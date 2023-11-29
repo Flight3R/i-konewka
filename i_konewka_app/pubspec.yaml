@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^6.1.0
   mysql1: ^0.20.0
+  # Bluetooth module required for arduino
+  flutter_bluetooth_serial: ^0.3.2
 
 dev_dependencies:
   flutter_test:
