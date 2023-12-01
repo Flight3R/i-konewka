@@ -1,6 +1,6 @@
 def get_plantid_api_key(file_path):
     """
-    :raises FileNotFoundError exception
+    :raises FileNotFoundError
     """
     with open(file_path, 'r') as api_key_file:
         api_key = api_key_file.read().strip()
@@ -9,7 +9,7 @@ def get_plantid_api_key(file_path):
 
 def get_openai_api_key(file_path):
     """
-    :raises FileNotFoundError exception
+    :raises FileNotFoundError
     """
     with open(file_path, 'r') as api_key_file:
         api_key = api_key_file.read().strip()
@@ -18,7 +18,7 @@ def get_openai_api_key(file_path):
 
 def get_database_credentials(file_path):
     """
-    :raises FileNotFoundError exception
+    :raises FileNotFoundError
     """
     with open(file_path, 'r') as database_details_file:
         database_config = {}

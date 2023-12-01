@@ -1,7 +1,7 @@
 import requests
 import json
 from load_credentials import get_plantid_api_key
-from json_parser import get_is_plant_from_json, get_flower_name_from_json
+from json_parser import get_is_plant_from_json, get_flower_name_from_json, get_is_flower_healthy_from_json, get_flower_disease_from_json
 from logger import logger
 from exception import PlainIdResponseException, IsNotPlantException
 
@@ -18,7 +18,7 @@ def identify_flower(flower_image_base64) -> str:
     """
     Performs flower identification using PlantId API
 
-    :raises PlainIdResponseException
+    :raises PlainIdResponseException, IsNotPlantException
     :forwards JsonReadException
     """
     data = {
@@ -29,8 +29,10 @@ def identify_flower(flower_image_base64) -> str:
 
     response = requests.post(IDENTIFICATION_URL, headers=HEADERS, data=json_data)
 
-    if response.status_code != 200:
-        raise PlainIdResponseException(f"PlantId responded with code {response.status_code}: {response}")
+    logger.debug('Recieved flower info.')
+
+    if response.status_code != 201:
+        raise PlainIdResponseException(f"PlantId responded with code {response.status_code}: {response.reason}")
 
     # :raises JsonReadException
     is_plant = get_is_plant_from_json(response.json())
@@ -40,13 +42,16 @@ def identify_flower(flower_image_base64) -> str:
 
     # :raises JsonReadException
     flower_name = get_flower_name_from_json(response.json())
-
+    logger.debug('Finished flower identification.')
     return flower_name
 
 
 def health_assessment(flower_image_base64) -> str:
     """
     Performs flower health assessment using PlantId API
+
+    :raises PlainIdResponseException, IsNotPlantException
+    :forwards JsonReadException
     """
     data = {
         'images': ['data:image/jpg;base64,' + flower_image_base64]
@@ -56,17 +61,19 @@ def health_assessment(flower_image_base64) -> str:
 
     response = requests.post(HEALTH_ASSESSMENT_URL, headers=HEADERS, data=json_data)
 
-    if response.status_code != 200:
+    if response.status_code != 201:
         raise PlainIdResponseException(f"PlantId responded with code {response.status_code}: {response}")
 
-    # :raises
-    # is_plant = get_is_plant_from_json(response.json())
+    # :raises JsonReadException
+    is_plant = get_is_plant_from_json(response.json())
 
-    # if not is_plant:
-    #     raise IsNotPlantException()
+    if not is_plant:
+        raise IsNotPlantException()
 
-    # # :raises JsonReadException
-    # flower_name = get_flower_name_from_json(response.json())
+    is_healthy = get_is_flower_healthy_from_json(response.json())
 
-    # return flower_name
+    if is_healthy:
+        return "OK"
 
+    flower_disease = get_flower_disease_from_json(response.json())
+    return flower_disease

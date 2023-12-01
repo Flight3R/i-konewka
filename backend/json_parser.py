@@ -8,8 +8,8 @@ def get_is_plant_from_json(json_data: str) -> bool:
     :raises JsonReadException
     """
     try:
-        is_plant_prob = json_data['result']['is_plant']['probability']
-        return True if is_plant_prob > 0.95 else False
+        is_plant = json_data['result']['is_plant']['binary']
+        return is_plant
     except KeyError as e:
         raise JsonReadException(f'Could not read fields from JSON: {e}')
 
@@ -34,8 +34,8 @@ def get_is_flower_healthy_from_json(json_data: str) -> str:
     :raises JsonReadException
     """
     try:
-        plant_is_healthy_prob = json_data['result']['is_healthy']['probability']
-        return True if plant_is_healthy_prob > 0.5 else False
+        plant_is_healthy = json_data['result']['is_healthy']['binary']
+        return plant_is_healthy
     except KeyError as e:
         raise JsonReadException(f'Could not read fields from JSON: {e}')
 
