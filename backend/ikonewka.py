@@ -333,14 +333,30 @@ def delete_flower(fid):
 @app.route('/api/flower_photo', methods=['POST'])
 @jwt_required()
 def add_flower_photo():
-    # header: { Authorization: "Bearer xxx" } # z tego mam uid
-    # params: {
-    #   fid: "xxx",
-    #   image: "xxx"
-    # }
-    # wpis do bazy danych do tabeli images
-    # update tabeli flowers: health
-    pass
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+        if any([param not in data for param in ['fid', 'image']]):
+            return jsonify({'error': 'Missing required fields (fid, image)'}), 400
+        fid = data['fid']
+        image = data['image']
+
+        flower = Flowers.query.filter_by(fid=fid, uid=current_user_id).first()
+
+        if flower:
+            flower_health = health_assessment(image)
+
+            new_image = Images(fid=fid, image=image)
+            db.session.add(new_image)
+            setattr(flower, 'health', flower_health)
+            db.session.commit()
+
+            return jsonify({'message': f'Image {new_image.iid} of flower {fid} added successfully'})
+        else:
+            return jsonify({'error': f'Flower with ID {fid} not found or does not belong to the user'}), 404
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/user_flowers', methods=['GET'])

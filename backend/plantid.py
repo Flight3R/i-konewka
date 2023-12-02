@@ -70,10 +70,10 @@ def health_assessment(flower_image_base64) -> str:
     if not is_plant:
         raise IsNotPlantException()
 
-    is_healthy = get_is_flower_healthy_from_json(response.json())
+    health = get_is_flower_healthy_from_json(response.json())
 
-    if is_healthy:
-        return "OK"
+    if health:
+        return "GOOD"
 
     flower_disease = get_flower_disease_from_json(response.json())
     return flower_disease

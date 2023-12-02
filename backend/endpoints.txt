@@ -17,15 +17,15 @@ ENDPOINTS:
       password: "xxx"
     }
     return: {
-        <auth_token>
+      <auth_token>
     }
 
   get_user_information:
     type: "GET",
     url: "/api/user_information",
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     return: {
       user_information: {
@@ -38,8 +38,8 @@ ENDPOINTS:
     type: "POST"
     url: "/api/flower"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     params: {
       name: "xxx", # eg "storczyk na parapecie w kuchni"
@@ -55,27 +55,27 @@ ENDPOINTS:
     type: "PUT"
     url: "/api/flower/<fid>"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     params: {
-        name: "xxx",
-        ml_per_watering: "xxx",
-        monday: "0/1",
-        tuesday: "0/1",
-        wednesday: "0/1",
-        thursday: "0/1",
-        friday: "0/1",
-        saturday: "0/1",
-        sunday: "0/1"
-        }
+      name: "xxx",
+      ml_per_watering: "xxx",
+      monday: "0/1",
+      tuesday: "0/1",
+      wednesday: "0/1",
+      thursday: "0/1",
+      friday: "0/1",
+      saturday: "0/1",
+      sunday: "0/1"
+    }
 
   get_flower_details:
     type: "GET"
     url: "/api/flower/<fid>"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     return: {
       flower_details: {
@@ -100,16 +100,16 @@ ENDPOINTS:
     type: "DELETE"
     url: "/api/flower/<fid>"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
 
   add_flower_photo:
     type: "POST"
     url: "/api/flower_photo"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     params: {
       fid: "xxx",
@@ -122,8 +122,8 @@ ENDPOINTS:
     type: "GET"
     url: "/api/user_flowers"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     return: {
       user_flowers: [
@@ -147,8 +147,8 @@ ENDPOINTS:
     type: "POST"
     url: "/api/watering"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     params: {
       fid: "xxx"
@@ -159,8 +159,8 @@ ENDPOINTS:
     type: "GET"
     url: "/api/watering/<fid>/<nof_waterings>"
     headers: {
-        Content-Type: application/json,
-        Authorization: "Bearer <auth_token>"
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
     }
     return: {
       watering_history: [
