@@ -9,6 +9,7 @@ from exception import JsonReadException, IsNotPlantException, PlainIdResponseExc
 from chatgpt import get_flower_type_watering_details_from_openai
 from logger import logger
 from helpers import is_weekday_active
+from sqlalchemy import desc
 
 app = Flask(__name__)
 CORS(app)
@@ -59,6 +60,7 @@ class Flowers(db.Model):
     ftid = db.Column(db.Integer, db.ForeignKey('FLOWER_TYPES.ftid'), nullable=False)
     name = db.Column(db.String, nullable=False)
     health = db.Column(db.String, nullable=False)
+    ml_per_watering = db.Column(db.Integer, nullable=False)
     monday = db.Column(db.Integer, default=0)
     tuesday = db.Column(db.Integer, default=0)
     wednesday = db.Column(db.Integer, default=0)
@@ -190,6 +192,7 @@ def add_flower():
         if found_flower_type:
             logger.debug(f'Found flower type in database: {found_flower_name}.')
             nof_watering_days = found_flower_type.nof_watering_days
+            ml_per_watering = found_flower_type.ml_per_watering
             new_flower_type_id = found_flower_type.ftid
         else:
             logger.info(f'Adding new flower type: {found_flower_name}.')
@@ -200,6 +203,7 @@ def add_flower():
             db.session.add(new_flower_type)
             db.session.commit()
             nof_watering_days = flower_type_details['nof_watering_days']
+            ml_per_watering = flower_type_details['ml_per_watering']
             new_flower_type_id = new_flower_type.ftid
 
         logger.debug('Flower health assessment by image.')
@@ -210,6 +214,7 @@ def add_flower():
                              ftid=new_flower_type_id,
                              name=data['flower_name'],
                              health=new_flower_health,
+                             ml_per_watering = ml_per_watering,
                              monday=watering_schedule['monday'],
                              tuesday=watering_schedule['tuesday'],
                              wednesday=watering_schedule['wednesday'],
@@ -235,6 +240,215 @@ def add_flower():
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
+@app.route('/api/add_watering', methods=['PUT'])
+@jwt_required()
+def add_watering():
+    try:
+        data = request.get_json()
+        current_user_id = get_jwt_identity()
+
+        if 'fid' not in data :
+            message = 'Missing required fields (fid)'
+            logger.error(message)
+            return jsonify({'error': message}), 400
+
+        new_watering = History(uid=current_user_id,
+                               fid=data['fid'])
+
+        db.session.add(new_watering)
+        db.session.commit()
+        logger.info(f'New watering {new_watering.hid} added.')
+        return jsonify({'message': 'Watering added successfully'})
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+@app.route('/api/delete_flower', methods=['DELETE'])
+@jwt_required()
+def delete_flower():
+    try:
+        data = request.get_json()
+        current_user_id = get_jwt_identity()
+
+        if 'fid' not in data :
+            message = 'Missing required fields (fid)'
+            logger.error(message)
+            return jsonify({'error': message}), 400
+
+        flower_to_delete = Flowers.query.filter_by(fid=data['fid'], uid=current_user_id).first()
+
+        if flower_to_delete:
+            History.query.filter_by(fid=data['fid']).delete()
+            Images.query.filter_by(fid=data['fid']).delete()
+
+            db.session.delete(flower_to_delete)
+            db.session.commit()
+
+            user = Users.query.filter_by(uid=current_user_id).first()
+            user.nof_flowers = user.nof_flowers - 1
+            db.session.commit()
+
+            return jsonify({'message': f'Flower with ID {data['fid']} deleted successfully'})
+        else:
+            return jsonify({'error': f'Flower with ID {data['fid']} not found or does not belong to the user'}), 404
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+@app.route('/api/update_flower', methods=['PUT'])
+@jwt_required()
+def update_flower():
+    try:
+        data = request.get_json()
+        current_user_id = get_jwt_identity()
+
+        if 'fid' not in data :
+            message = 'Missing required fields (fid)'
+            logger.error(message)
+            return jsonify({'error': message}), 400
+
+        flower_to_update = Flowers.query.filter_by(fid=data['fid'], uid=current_user_id).first()
+
+        if flower_to_update:
+            data = request.get_json()
+
+            if 'name' in data:
+                flower_to_update.name = data['name']
+
+            if 'ml_per_watering' in data:
+                flower_to_update.ml_per_watering = data['ml_per_watering']
+
+            for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+                if day in data:
+                    setattr(flower_to_update, day, data[day])
+
+            db.session.commit()
+
+            return jsonify({'message': f'Flower with ID {data['fid']} updated successfully'})
+        else:
+            return jsonify({'error': f'Flower with ID {data['fid']} not found or does not belong to the user'}), 404
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+@app.route('/api/get_user_flowers', methods=['GET'])
+@jwt_required()
+def get_user_flowers():
+    try:
+        current_user_id = get_jwt_identity()
+        user_flowers = Flowers.query.filter_by(uid=current_user_id).all()
+
+        flowers_list = []
+
+        for flower in user_flowers:
+            flower_info = {
+                'fid': flower.fid,
+                'name': flower.name,
+                'health': flower.health,
+                'ml_per_watering': flower.ml_per_watering,
+                'monday': flower.monday,
+                'tuesday': flower.tuesday,
+                'wednesday': flower.wednesday,
+                'thursday': flower.thursday,
+                'friday': flower.friday,
+                'saturday': flower.saturday,
+                'sunday': flower.sunday
+            }
+
+            latest_image = Images.query.filter_by(fid=flower.fid).order_by(desc(Images.image_timestamp)).first()
+
+            if latest_image:
+                flower_info['image'] = latest_image.image
+            else:
+                flower_info['image'] = None
+
+            flowers_list.append(flower_info)
+
+        return jsonify({'user_flowers': flowers_list})
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+@app.route('/api/get_flower_details', methods=['GET'])
+@jwt_required()
+def get_flower_details():
+    try:
+        flower_fid = request.args.get('fid')
+        current_user_id = get_jwt_identity()
+
+        if flower_fid is None:
+            message = 'Missing required fields (fid)'
+            logger.error(message)
+            return jsonify({'error': message}), 400
+
+        fid = request.args.get('fid')
+        flower_detail = Flowers.query.filter_by(fid=flower_fid, uid=current_user_id).first()
+
+        if flower_detail:
+            flower_info = {
+                'fid': flower_detail.fid,
+                'name': flower_detail.name,
+                'health': flower_detail.health,
+                'monday': flower_detail.monday,
+                'tuesday': flower_detail.tuesday,
+                'ml_per_watering': flower_detail.ml_per_watering,
+                'wednesday': flower_detail.wednesday,
+                'thursday': flower_detail.thursday,
+                'friday': flower_detail.friday,
+                'saturday': flower_detail.saturday,
+                'sunday': flower_detail.sunday
+            }
+
+            latest_image = Images.query.filter_by(fid=flower_fid).order_by(desc(Images.image_timestamp)).first()
+
+            if latest_image:
+                flower_info['image'] = latest_image.image
+            else:
+                flower_info['image'] = None
+
+            return jsonify({'flower_detail': flower_info})
+        else:
+            return jsonify({'error': f'Flower with ID {flower_fid} not found or does not belong to the user'}), 404
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+@app.route('/api/get_last_waterings', methods=['GET'])
+@jwt_required()
+def get_last_waterings():
+    try:
+        fid = request.args.get('fid')
+        nof_waterings = request.args.get('nof_waterings')
+        current_user_id = get_jwt_identity()
+
+        if fid is None:
+            message = 'Missing required field (fid)'
+            logger.error(message)
+            return jsonify({'error': message}), 400
+
+        flower = Flowers.query.filter_by(fid=fid, uid=current_user_id).first()
+
+        if not flower:
+            return jsonify({'error': f'Flower with ID {fid} was not water or does not belong to the user'}), 404
+
+        last_waterings = History.query.filter_by(fid=fid, uid=current_user_id).order_by(desc(History.watering)).limit(nof_waterings).all()
+
+        waterings_list = [
+            {
+                'watering_timestamp': watering.watering.isoformat(),
+            }
+            for watering in last_waterings
+        ]
+
+        return jsonify({'last_waterings': waterings_list})
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
 if __name__ == '__main__':
     app.run(host='192.168.0.2', port=5000, debug=True)
-
