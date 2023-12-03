@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone, timedelta
-from load_credentials import get_database_credentials
+from load_credentials import get_database_credentials, get_key
 from plantid import identify_flower, health_assessment
 from exception import JsonReadException, IsNotPlantException, PlainIdResponseException
 from chatgpt import get_flower_type_watering_details_from_openai
@@ -24,7 +24,7 @@ PASSWORD = database_data['PASSWORD']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}:3306/{DATABASE}'
 db = SQLAlchemy(app)
 
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random and secure key in production
+app.config['JWT_SECRET_KEY'] = get_key('jwt_key')  # Change this to a random and secure key in production
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 jwt = JWTManager(app)
 
@@ -112,20 +112,18 @@ def register():
 def login():
     try:
         data = request.get_json()
-
         if any([param not in data for param in ['email', 'password']]):
             return jsonify({'error': 'Username and password are required'}), 400
 
         user = Users.query.filter_by(email=data['email'],
                                      password=data['password']).first()
-        print(user)
         if user:
             access_token = create_access_token(identity=user.uid)
             return jsonify(access_token), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
     except Exception as e:
-        print(e)
+        logger.error(f'{request.get_data()=}')
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
@@ -448,4 +446,4 @@ def get_last_watering(fid, nof_waterings):
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.0.2', port=5000, debug=True)
+    app.run(host='192.168.0.2', port=60001, debug=True)

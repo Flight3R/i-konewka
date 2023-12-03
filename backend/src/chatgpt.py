@@ -1,12 +1,12 @@
 from openai import OpenAI
-from load_credentials import get_openai_api_key
+from load_credentials import get_key
 
 flower_type_from_api = "Pilea peperomioides"
 default_ml_per_watering = 250
 default_nof_watering_days = 2
 
 
-API_KEY = get_openai_api_key('openai_api_key')
+API_KEY = get_key('openai_api_key')
 
 
 def get_flower_type_watering_details_from_openai(flower_type_name):

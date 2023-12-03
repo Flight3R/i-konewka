@@ -1,7 +1,8 @@
 **__pycache__
-backend/database_credentials
-backend/plantid_api_key
-backend/openai_api_key
-backend/env
-backend/ikonewka_backend.log
+backend/src/database_credentials
+backend/src/plantid_api_key
+backend/src/openai_api_key
+backend/src/jwt_key
+backend/src/env
+backend/src/ikonewka_backend.log
 **test*
