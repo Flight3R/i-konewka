@@ -38,7 +38,10 @@ dependencies:
   google_fonts: ^6.1.0
   mysql1: ^0.20.0
   # Bluetooth module required for arduino
-  flutter_bluetooth_serial: ^0.3.2
+  flutter_bluetooth_serial: ^0.4.0
+  http: ^1.1.2
+  # Bluetooth module for BT classic
+  flutter_blue: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +53,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  mockito: ^5.4.3
+  build_runner: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
