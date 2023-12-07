@@ -1,0 +1,180 @@
+ENDPOINTS:
+  register:
+    type: "POST"
+    url: "/auth/register"
+    headers: {
+      Content-Type: application/json
+    }
+    params: {
+      nick: "xxx",
+      email: "xxx",
+      password: "xxx",
+      watering_hour: "xxx"
+    }
+
+  login:
+    type: "POST"
+    url: "/auth/login"
+    headers: {
+      Content-Type: application/json
+    }
+    params: {
+      email: "xxx",
+      password: "xxx"
+    }
+    return: {
+      <auth_token>
+    }
+
+  get_user_information:
+    type: "GET",
+    url: "/api/user_information",
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    return: {
+      user_information: {
+        flowers_count: "xxx",
+        watering_hour: "xxx"
+      }
+    }
+
+  add_flower:
+    type: "POST"
+    url: "/api/flower"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    params: {
+      name: "xxx", # eg "storczyk na parapecie w kuchni"
+      image: "xxx"
+    }
+    # na backendzie w oparciu o PlantId dodawany jest flower_type_id
+    # do ustawienia na backendzie w oparciu o watering schedule
+    # aby ustalić iloś ml używane jest openai
+    # dodawana jest propozycja planu podlewania (pn-pt)
+    # jednoczesne dodawnie do tabeli images
+
+  update_flower:
+    type: "PUT"
+    url: "/api/flower/<fid>"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    params: {
+      name: "xxx",
+      ml_per_watering: "xxx",
+      monday: "0/1",
+      tuesday: "0/1",
+      wednesday: "0/1",
+      thursday: "0/1",
+      friday: "0/1",
+      saturday: "0/1",
+      sunday: "0/1"
+    }
+
+  get_flower_details:
+    type: "GET"
+    url: "/api/flower/<fid>"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    return: {
+      flower_details: {
+        fid: "xxx",
+        name: "xxx",
+        type: "xxx",
+        health: "xxx",
+        image: "xxx",
+        ml_per_watering: "xxx",
+        monday: "0/1",
+        tuesday: "0/1",
+        wednesday: "0/1",
+        thursday: "0/1",
+        friday: "0/1",
+        saturday: "0/1",
+        sunday: "0/1"
+      }
+    }
+    # zwracamy najnowsze zdjęcie
+
+  delete_flower:
+    type: "DELETE"
+    url: "/api/flower/<fid>"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+
+  add_flower_photo:
+    type: "POST"
+    url: "/api/flower_photo"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    params: {
+      fid: "xxx",
+      image: "xxx"
+    }
+    # wpis do bazy danych do tabeli images
+    # update tabeli flowers: health
+
+  get_user_flowers:
+    type: "GET"
+    url: "/api/user_flowers"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    return: {
+      user_flowers: [
+        fid: "xxx",
+        name: "xxx",
+        health: "xxx",
+        image: "xxx",
+        ml_per_watering: "xxx",
+        monday: "0/1",
+        tuesday: "0/1",
+        wednesday: "0/1",
+        thursday: "0/1",
+        friday: "0/1",
+        saturday: "0/1",
+        sunday: "0/1"
+      ]
+    }
+    # zwracamy najnowsze zdjęcie
+
+  add_watering:
+    type: "POST"
+    url: "/api/watering"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    params: {
+      fid: "xxx"
+    }
+    # insert to HISTORY
+
+  get_last_watering:
+    type: "GET"
+    url: "/api/watering/<fid>/<nof_waterings>"
+    headers: {
+      Content-Type: application/json,
+      Authorization: "Bearer <auth_token>"
+    }
+    return: {
+      watering_history: [
+        "timestamp1",
+        "timestamp2",
+        "timestamp3",
+        ...
+        "timestampINT(nof_waterings)"
+      ]
+    }
+
