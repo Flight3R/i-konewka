@@ -2,6 +2,9 @@ ENDPOINTS:
   register:
     type: "POST"
     url: "/auth/register"
+    headers: {
+      Content-Type: application/json
+    }
     params: {
       nick: "xxx",
       email: "xxx",
@@ -12,6 +15,9 @@ ENDPOINTS:
   login:
     type: "POST"
     url: "/auth/login"
+    headers: {
+      Content-Type: application/json
+    }
     params: {
       email: "xxx",
       password: "xxx"

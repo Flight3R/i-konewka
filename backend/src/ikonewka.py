@@ -119,11 +119,11 @@ def login():
                                      password=data['password']).first()
         if user:
             access_token = create_access_token(identity=user.uid)
+            logger.info(f'User {user.uid} logged in.')
             return jsonify(access_token), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
     except Exception as e:
-        logger.error(f'{request.get_data()=}')
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
@@ -446,4 +446,4 @@ def get_last_watering(fid, nof_waterings):
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.0.2', port=60001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
