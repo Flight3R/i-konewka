@@ -1,28 +1,38 @@
 # i-konewka
 
-This is the project of automatic water can which facilitates daily planting routine.
+![plot](./images/logo.png)
 
-## How it works
+Innowacyjna konewka do nawadniania roślin, wyposażona w rozpoznawanie gatunku kwiatów poprzez kamerę, to nasz projekt. Dzięki zaawansowanej technologii IoT i rozpoznawania wizyjnego, ma on za zadanie zrewolucjonizować pielęgnację roślin, poprawiając ich zdrowie i wzrost w każdym gospodarstwie domowym. Zaoszczędź czas i stwórz optymalne warunki dla roślin, niezależnie od poziomu doświadczenia – dla ogrodników profesjonalistów i początkujących miłośników zieleni. Podstawowe funkcje obejmują: planowanie podlewania, rozpoznawanie gatunku kwiatów oraz dedykowaną aplikację mobilną.
 
-Whole system is composed of a mobile application, which user installs on their smartphone,
-an IoT device enclosing microprocessor and a pump allowing the water to feed the flowers.
+Cały system składa się z aplikacji mobilnej, którą użytkownik instaluje na swoim smartfonie, urządzenia IoT zawierającego mikroprocesor oraz pompy umożliwiającej podawanie wody roślinom.
 
-### Mobile application
+## Schemat projektu
 
-A Flutter application designed to support watering device by adding controls and logic.
-The user can create an account where they can store their plants, each one with different
-placeholder. A camera installed on the smartphone can be used to identify user's flower.
-Thanks to a plant identification and health assessment engine provided by [PlantId](https://plant.id/) API
-we have managed to integrate machine learning to our application to help user take a better care of their flowers.
+![plot](./images/scheme.png)
 
-### Watering can
+## Dokumentacja
 
+### Aplikacja mobilna
 
+Aplikacja Flutter zaprojektowana w celu wsparcia urządzenia do podlewania poprzez dodanie kontroli i logiki. Użytkownik może utworzyć konto, w którym może przechowywać informacje o swoich roślinach, z różnymi atrybutami. Kamera zainstalowana w smartfonie może być używana do identyfikacji kwiatów użytkownika. Dzięki silnikowi identyfikacji roślin i oceny zdrowia dostarczanemu przez API PlantId.
 
+### Połaczenie bluetooth
 
-## How to run
+### API i-konewka
 
-## Special thanks
+### API PlantId
+
+### API openAI
+
+### Baza danych
+
+### Fizyczne urządzenie
+
+### Program zarządzający hardware
+
+## Podziękowania
+
+Chcielibyśmy wspomnieć firmę [kindwise](https://www.kindwise.com/) za udostępnienie nam ich fantastycznego narzędzia [PlantId](https://plant.id/), które znakomicie wzbogaciło nasz projekt. Ich maszynowe rozpoznawanie kwiatów na podstawie obrazów pozwoliło nam poszerzyć zakres zastosowania naszej aplikacji.
 
 We would like to mention [kindwise](https://www.kindwise.com/) companany for providing us
 their awesome tool [PlantId](https://plant.id/) which added great functionality to our project.
