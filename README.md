@@ -65,11 +65,23 @@ Ostatnia tabela, **IMAGES**, zawiera informacje o obrazach przypisanych do konkr
 
 Wszystkie te tabele są ze sobą powiązane za pomocą kluczy obcych (foreign keys), co umożliwia skonstruowanie spójnej bazy danych, gdzie informacje o użytkownikach, typach kwiatów, konkretnych kwiatach, historii podlewania i obrazach są ze sobą powiązane.
 
+Plik ze wstępną konfiguracją bazy danych: [init_schema.sql](./database/init_schema.sql)
+
 ### Fizyczne urządzenie
 
 ### Lista potrzebnego sprzętu
 
 ### Program zarządzający hardware
+
+## Wykorzystane narzędzia 
+
+* [openAI](https://platform.openai.com/docs/introduction)
+* [PlantId](https://plant.id/)
+* [Flutter](https://flutter.dev/)
+
+## Możliwy rozwój
+
+Istnieje możliwość rozwoju innowacyjnej konewki do nawadniania roślin, poprzez wprowadzenie zaawansowanych funkcji. W planach jest integracja czujników wilgotności i nasłonecznienia, co otworzy drzwi do automatycznego dostosowywania planu podlewania do aktualnych warunków atmosferycznych. Aplikacja mobilna, będąca sercem systemu, umożliwi użytkownikom korzystanie z tej potężnej funkcji, monitorując poziom wilgotności gleby i intensywność nasłonecznienia. Choć to dopiero wizja, możliwość wprowadzenia tej funkcjonalności jest kamieniem milowym do uzyskania bardziej zaawansowanego i inteligentnego systemu podlewania, oferującego optymalną pielęgnację roślin, dostosowaną do ich unikalnych potrzeb i otoczenia.
 
 ## Podziękowania
 
