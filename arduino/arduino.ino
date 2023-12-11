@@ -1,7 +1,8 @@
 #include <BluetoothSerial.h>
 
-#define LED 2
+#define PUMP 2
 #define MAX_LENGTH 100
+#define PUMP_CAPACITY 0.0015 // ml/msec
 
 BluetoothSerial SerialBT;
 
@@ -57,7 +58,17 @@ class Command {
     }
 };
 
+int millilitersToMilliseconds(int milliliters){
+  return milliliters/PUMP_CAPACITY;
+}
+
+
+int timeToTurnOffPump = 0;
+int previousTime = 0;
+
 void setup() {
+  pinMode(PUMP, OUTPUT);
+  
   Serial.begin(9600);
   SerialBT.begin("IKonewka");
 }
@@ -67,14 +78,24 @@ void loop() {
     Command c;
     c.read();
 
-    if(c.is("on")) {
-      digitalWrite(LED, HIGH);
-      SerialBT.println("high");
+    if(c.is("connect")) {
+      SerialBT.println("ok");
     } 
-    else if (c.is("off")) {
-      digitalWrite(LED, LOW);
-      SerialBT.println("low");
+    else if (c.is("water")) {
+      timeToTurnOffPump = millilitersToMilliseconds(c.valToInt());
     }
   }
 
+  int elapsedTime = millis() - previousTime;
+
+  if(timeToTurnOffPump > 0) {
+    digitalWrite(PUMP, HIGH);
+    timeToTurnOffPump -= elapsedTime;
+  } else {
+    digitalWrite(PUMP, LOW);
+    timeToTurnOffPump = 0;
+  }
+
+  previousTime = millis();
+  delay(5);
 }
