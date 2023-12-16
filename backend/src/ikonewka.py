@@ -226,7 +226,7 @@ def add_flower():
         user.nof_flowers = user.nof_flowers + 1
         db.session.commit()
 
-        return jsonify({'message': 'Flower added successfully'})
+        return jsonify({'message': {'flower_id': new_flower.fid}})
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
