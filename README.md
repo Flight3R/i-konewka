@@ -33,8 +33,42 @@ Lista endpoit'ów:
 * ``/api/flower_details`` - pobranie wszystkich informacji o kwiatku
 * ``/api/add_watering`` - dodanie podlewania do bazy danych
 * ``/api/get_last_waterings`` - pobranie ostatnich podlewań
-* ``/api/delete_flowe`` - usunięcie kwiatka z bazy danych
+* ``/api/delete_flower`` - usunięcie kwiatka z bazy danych
 * ``/api/update_flower`` - zmiana informacji o kwiatku
+
+### Uwierzytelnianie
+
+Odpowiedzialne za uwierzytelnianie użytkownika endpointy `/auth/register` oraz `/auth/login` odpowiednio dodają oraz wyszukują użytkownika o podanych parametrach w celu umożliwienia mu korzystania z funkcjonalności aplikacji.
+
+Po przesłaniu przez formularz logowania informacji, które znajdują dopasowanie w bazie danych, odsyłany jest token (JWT), który aplikacja mobilna zachowuje w celu dalszego korzystania z endpointów.
+
+### Obsługa roślin
+
+W zbiorze endpointów części backend zdefiniowano zakres tych odpowiedzialnych za operacje na roślinach użytkownika. Każda z nich zapewnia unikalną funkcjonalność, co daje przejżysty i łatwy w utrzymaniu kod.
+
+Wszystkie niżej opisane pocedury wymagają zalogowanego użytkownika, który jest rozróżniany za pośrednictwem przesyłanego w nagłówku zapytania tokenu.
+
+#### Wyświetlanie
+
+W celach prezentacji danych w aplikacji zostały przygotowane endpointy `/api/user_information`, `/api/user_flowers`, `/api/flower_details` oraz `/api/get_last_waterings`. Zwracają one podstawowe informacje o użytkowniku, zapisanych przez niego roślinach, o ilości tych roślin, ich parametrach oraz wykonanych podlewaniach dowolnego z posiadanych kwiatów.
+
+#### Dodawanie
+
+Endpointy `/api/add_flower` oraz `/api/add_flower_photo`. Ich zadaniem jest zapewnienie możliwości dodawania roślin do bazy danych. W czasie pierwszego dodania rośliny następuje jej identyfikacja za pomocą usługi PlantId co zostało szerzej opisane w rozdziale [API PlantId](#api-plantid). Kolejno ustalane są szczegóły planu podlewania z wykorzystaniem ChatGPT (rozdział [API openAI](#api-openai)).
+
+Po dodaniu kolejnego zdjęcia do już istniejącego kwiatka następuje jedynie identyfikacja jego zdrowia, którego nowa wartość wpisywana jest do bazy danych.
+
+#### Podlewanie
+
+Każdorazowe podlanie kwiatka musi być poprzedzone odnotowaniem tego w bazie danych poprzez wykonanie zapytania na endpoint `/api/add_flower_photo`. Rejestrowane są: identyfikator rośliny, moment podlania oraz ilość dozowanej wody.
+
+#### Modyfikacja
+
+Prezentowane rozwiązanie umożliwia, za pośrednictwem endpointu `/api/update_flower`, bardziej zaawansowanemu użytkownikowi modyfikację automatycznie proponowanych parametrów. Możliwa jest zmiana nazwy, harmonogramu podlewania czy ilości podawanej wody.
+
+#### Usuwanie
+
+Przygotowany endpoint `/api/delete_flower` pozwala na usunięcie niechcianej rośliny z bazy danych aplikacji. Usunięcie powoduje aktualizację pozostałych tabel w bazie danych, aby jej spójność nie została utracona (rozdział [Baza danych](#baza-danych)).
 
 ### API PlantId
 
@@ -78,13 +112,13 @@ Do tego celu wybrana została pratforma [Docker](https://www.docker.com/). W ram
 
 W podobny sposób przygotowano kontener obsługujący serwer bazodanowy, w oparciu o plik konfiguracyjny opisany w rozdziale [Baza Danych](#baza-danych). Z uwagi na skomplikowanie, wydajność, jak i bezpieczeństwo danych, zdecydowano się na utworzenie osobnej instancji bazy danych w środowisku *Docker.*
 
-Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem platformy *Docker,* została utworzona wirtualna sieć *ikonewa_network*. W tej sieci uruchomione zostały: kontener backendowy, kontener bazodowanowy.
+Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem platformy *Docker,* została utworzona wirtualna sieć *ikonewa_network*. W tej sieci uruchomione zostały: kontener *backend*, kontener *mysql*.
 
-W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostały porty maszyny hostującej: XXXX.
+W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostało dodane przekierowanie portów umożliwiające połączenie tunelu cloudflare oraz kontenera z portem 60001.
 
 ### Cloudflare
 
-Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z usugą [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie XXXX. Dzięki wykorzystaniu tunelowania ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
+Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z wykorzystaniem usugi [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie 60001. Dzięki tunelowaniu ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
 
 ### Fizyczne urządzenie
 
