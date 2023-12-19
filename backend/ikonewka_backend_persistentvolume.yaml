@@ -10,16 +10,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: "/persistent_volumes/ikonewka_backend/storage"
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ikonewka-backend-pvc
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
