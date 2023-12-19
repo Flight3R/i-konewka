@@ -126,6 +126,23 @@ Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci
 
 ### Program zarządzający hardware
 
+## Rozeznanie rynku
+
+Podczas prac nad aplikacją zdecydowaliśmy się przeprowadzić pełną analizę rynku, która pozwoliła nam scharakteryzować potencjalnych klientów (persony) aplikacji oraz opinie ekspertów od opieki nad roślinami.
+Zaczynając od początku zostały stworzone trzy różne persony, które mają różne wymagania oraz oczekiwania względem aplikacji.
+
+![image](https://github.com/Flight3R/i-konewka/assets/56027574/13f91b5c-1287-4538-b70a-070a21f33ae2)
+![image](https://github.com/Flight3R/i-konewka/assets/56027574/2b116a71-929b-442a-883c-241590a45e7c)
+![image](https://github.com/Flight3R/i-konewka/assets/56027574/158f3d11-7ccd-4366-ac6f-55d7930a44ca)
+
+Podczas pracy nad aplikacją staraliśmy się odpowiadać na żądania oraz obawy potencjalnych użytkowników względem aplikacji, aby byli skorzy ją wykorzystać do codziennego użycia. To doskonale pokazuje, że nasz projekt jest zdecydowanie skierowany na użytkownika końcowegom co jest niezwykle istotne w tworzeniu aplikacji mobilnych, które mają być łatwe oraz przyjemne w obsłudze.
+
+Poniżej przedstawiamy parę kluczowych wniosków, które zostały wyciągnięte po szczegółowej ankiecie przeprowadzonej w trzech kwiaciarniach:
+1) Kluczowa jest monitorowanie oraz analiza stanu rośliny, aby wykryć wszelkie nieprawidłowości już na samym początku problemów.
+2) Niezwykle istotny jest fakt, że korzystanie z I-konewki pozwoliłoby zaoszczędzić czas, pieniądze oraz zmniejszyć stres zarówno u profesjonalistów jak i wśród domowych amatorów roślin. 
+3) W 99% przypadków problemem rośliny jest jej nieprawidłowa pielęgnacja czy podlewanie, a korzystanie z automatycznej i inteligentnej konewki pozwoliłoby zredukować liczbę takich przypadków przynajmniej kilkukrotnie.
+4) Rozpoznawanie kwiatów pozwoliłoby natychmiastowo dowiedzieć się prawdziwej nazwy rośliny oraz jej wymagań, co umożliwiłoby szybszą reakcję na problemy niż powolne przeszukiwanie Internetu.
+
 ## Wykorzystane narzędzia
 
 * [openAI](https://platform.openai.com/docs/introduction)
