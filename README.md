@@ -20,18 +20,21 @@ Aplikacja Flutter zaprojektowana w celu wsparcia urządzenia do podlewania poprz
 
 ### API i-konewka
 
+Część "backend" projektu i-konewka została wykonana z użyciem frameworka [Flask](https://flask.palletsprojects.com/). Został on wybrany ze względu na niewielki narzut oraz prostotę, która została postawiona postawiona ponad skomplikowanie innych rozwiązań wykorzystywanych w tej dziedzinie. Łatwa do użycia składnia Flaska pozoliła nam w stosunkowo krótkim czasie wytworzyć w pełni fnkcjonalną oraz poprawną w kontekście rozwoju aplikację. Wszystkie założone w projekcie funkcjonalności zostały zaimplementowane.
+
 Lista endpoit'ów:
-* ```/auth/register``` - rejestracja użytkowmika
-* ```/auth/login``` - logowanie użytkownika
-* ```/api/user_information``` - pobranie informacji o użytkowniku
-* ```/api/add_flower``` - dodanie kwiatka do bazy danych
-* ```/api/add_flower_photo``` - dodanie zdjęcia kwiatka
-* ```/api/user_flowers``` -  pobranie informacji o kwiatach uzytkownika
-* ```/api/flower_details``` - pobranie wszystkich informacji o kwiatku
-* ```/api/add_watering``` - dodanie podlewania do bazy danych
-* ```/api/get_last_waterings``` - pobranie ostatnich podlewań
-* ```/api/delete_flowe``` - usunięcie kwiatka z bazy danych
-* ```/api/update_flower``` - zmiana informacji o kwiatku
+
+* ``/auth/register`` - rejestracja użytkowmika
+* ``/auth/login`` - logowanie użytkownika
+* ``/api/user_information`` - pobranie informacji o użytkowniku
+* ``/api/add_flower`` - dodanie kwiatka do bazy danych
+* ``/api/add_flower_photo`` - dodanie zdjęcia kwiatka
+* ``/api/user_flowers`` -  pobranie informacji o kwiatach uzytkownika
+* ``/api/flower_details`` - pobranie wszystkich informacji o kwiatku
+* ``/api/add_watering`` - dodanie podlewania do bazy danych
+* ``/api/get_last_waterings`` - pobranie ostatnich podlewań
+* ``/api/delete_flowe`` - usunięcie kwiatka z bazy danych
+* ``/api/update_flower`` - zmiana informacji o kwiatku
 
 ### API PlantId
 
@@ -45,7 +48,7 @@ Potęga w dziedzinie uczenia maszynowego opiera się na najnowocześniejszych me
 
 OpenAI API to interfejs programistyczny (API) udostępniany przez firmę OpenAI, umożliwiający deweloperom integrację zaawansowanych modeli językowych w swoich aplikacjach i usługach. Kluczowym elementem API jest użycie modelu GPT (Generative Pre-trained Transformer) do generowania tekstów na podstawie dostarczonych wejść.
 
-W projekcie zostało wykorzystane do dopasowania ilości potrzebnej do podlania kwiatka oraz liczbie dni podlewań w tygodniu. Informacje ustalono na podstawie gatunku kwiatka. 
+W projekcie zostało wykorzystane do dopasowania ilości potrzebnej do podlania kwiatka oraz liczbie dni podlewań w tygodniu. Informacje ustalono na podstawie gatunku kwiatka.
 
 Kod z implementacją znajduje się w pliku [chatgpt.py](./backend/src/chatgpt.py)
 
@@ -67,17 +70,34 @@ Wszystkie te tabele są ze sobą powiązane za pomocą kluczy obcych (foreign ke
 
 Plik ze wstępną konfiguracją bazy danych: [init_schema.sql](./database/init_schema.sql)
 
+### Docker
+
+Po wytworzeniu oprogramowania dla aplikacji i-konewka koniecznym stało się udostępnienie jej dla klientów indywidualnych, którzy, za pośrednictwem aplikacji mobilnej, będą korzystac z funkcjonalności dla nich przygotowanych.
+
+Do tego celu wybrana została pratforma [Docker](https://www.docker.com/). W ramach konfiguracji serwera aplikacji *i-konewka* przygotowany został plik komend generujący obrazy przeznaczone do działania w środowisku produkcyjnym. Instancje części backendowej zostały uruchomione z wykorzystaniem frameworka [Gunicorn](https://gunicorn.org/), oferującego w pełni funkcjonalny serwer produkcyjny; dopasowany pod wzdlęgami zarówno wydajności, jak i bezpieczeństwa, do potrzeb wprowadzanej na rynek aplikacji.
+
+W podobny sposób przygotowano kontener obsługujący serwer bazodanowy, w oparciu o plik konfiguracyjny opisany w rozdziale [Baza Danych](#baza-danych). Z uwagi na skomplikowanie, wydajność, jak i bezpieczeństwo danych, zdecydowano się na utworzenie osobnej instancji bazy danych w środowisku *Docker.*
+
+Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem platformy *Docker,* została utworzona wirtualna sieć *ikonewa_network*. W tej sieci uruchomione zostały: kontener backendowy, kontener bazodowanowy.
+
+W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostały porty maszyny hostującej: XXXX.
+
+### Cloudflare
+
+Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z usugą [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie XXXX. Dzięki wykorzystaniu tunelowania ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
+
 ### Fizyczne urządzenie
 
 ### Lista potrzebnego sprzętu
 
 ### Program zarządzający hardware
 
-## Wykorzystane narzędzia 
+## Wykorzystane narzędzia
 
 * [openAI](https://platform.openai.com/docs/introduction)
 * [PlantId](https://plant.id/)
 * [Flutter](https://flutter.dev/)
+* [Flask](https://flask.palletsprojects.com/)
 
 ## Możliwy rozwój
 
