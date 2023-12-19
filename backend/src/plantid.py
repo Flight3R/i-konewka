@@ -1,11 +1,11 @@
 import requests
 import json
-from load_credentials import get_key
+from load_credentials import load_secret
 from json_parser import get_is_plant_from_json, get_flower_name_from_json, get_is_flower_healthy_from_json, get_flower_disease_from_json
 from logger import logger
 from exception import PlainIdResponseException, IsNotPlantException
 
-API_KEY = get_key('plantid_api_key')
+API_KEY = load_secret('PLANTID_API_KEY')
 IDENTIFICATION_URL = 'https://plant.id/api/v3/identification'
 HEALTH_ASSESSMENT_URL = 'https://plant.id/api/v3/health_assessment'
 HEADERS = {

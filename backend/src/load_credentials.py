@@ -1,18 +1,12 @@
-def get_key(file_path):
-    """
-    :raises FileNotFoundError
-    """
-    with open(file_path, 'r') as api_key_file:
-        api_key = api_key_file.read().strip()
-    return api_key
+import os
+import base64
+from logger import logger
 
-
-def get_database_credentials(file_path):
-    """
-    :raises FileNotFoundError
-    """
-    with open(file_path, 'r') as database_details_file:
-        database_config = {}
-        for key, line in zip(['HOST', 'DATABASE', 'USER', 'PASSWORD'], database_details_file):
-            database_config[key] = line.strip()
-    return database_config
+def load_secret(secret_key):
+    logger.info(f"Loading secret {secret_key=}")
+    secret_value = os.environ.get(secret_key)
+    if secret_value is None:
+        logger.critical(f"Loading secret {secret_key=} failed!")
+        raise ValueError
+    logger.info(f"Secter loaded successbully: {secret_value=}")
+    return secret_value

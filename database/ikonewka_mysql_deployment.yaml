@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ikonewka-mysql-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ikonewka-mysql
+  template:
+    metadata:
+      labels:
+        app: ikonewka-mysql
+    spec:
+      containers:
+        - name: ikonewka-mysql-container
+          image: 192.168.0.2:5000/ikonewka_mysql_image
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ikonewka-mysql-service
+spec:
+  selector:
+    app: ikonewka-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

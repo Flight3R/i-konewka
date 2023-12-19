@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone, timedelta
-from load_credentials import get_database_credentials, get_key
+from load_credentials import load_secret
 from plantid import identify_flower, health_assessment
 from exception import JsonReadException, IsNotPlantException, PlainIdResponseException
 from chatgpt import get_flower_type_watering_details_from_openai
@@ -11,22 +11,25 @@ from logger import logger
 from helpers import is_weekday_active
 from sqlalchemy import desc
 
+
 app = Flask(__name__)
 CORS(app)
 
-database_data = get_database_credentials("database_credentials")
+MYSQL_HOST = load_secret("MYSQL_HOST")
+MYSQL_DATABASE = "ikonewka"
+MYSQL_USER = load_secret("MYSQL_USER")
+MYSQL_PASSWORD = load_secret("MYSQL_PASSWORD")
+JWT_KEY = load_secret("JWT_KEY")
 
-HOST = database_data['HOST']
-DATABASE = database_data['DATABASE']
-USER = database_data['USER']
-PASSWORD = database_data['PASSWORD']
-
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}:3306/{DATABASE}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:3306/{MYSQL_DATABASE}'
 db = SQLAlchemy(app)
 
-app.config['JWT_SECRET_KEY'] = get_key('jwt_key')  # Change this to a random and secure key in production
+app.config['JWT_SECRET_KEY'] = JWT_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 jwt = JWTManager(app)
+
+
+logger.info("iKonewka backend started successfully")
 
 
 class Users(db.Model):
@@ -446,4 +449,4 @@ def get_last_watering(fid, nof_waterings):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)

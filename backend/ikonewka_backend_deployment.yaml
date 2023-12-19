@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ikonewka-backend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ikonewka-backend
+  template:
+    metadata:
+      labels:
+        app: ikonewka-backend
+    spec:
+      containers:
+      - name: ikonewka-backend-container
+        image: 192.168.0.2:5000/ikonewka_backend_image
+        env:
+        - name: JWT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: JWT_KEY
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: OPENAI_API_KEY
+        - name: PLANTID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: PLANTID_API_KEY
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: MYSQL_HOST
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ikonewka-secret
+              key: MYSQL_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ikonewka-backend-service
+spec:
+  selector:
+    app: ikonewka-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30001
+  type: NodePort
