@@ -122,7 +122,19 @@ Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci
 
 ### Fizyczne urządzenie
 
+Budowa urządzenia zoptymalizowana została w celu możliwości szybkiego i taniego wydruku w technologii druku 3D. Model został podzielony na kilka mniejszych elementów dla uniknięcia przymusu druku supportów(materiału wsparciowego). Montaż jest prosty do wykonania przy pomocy kleju cyjanoakrylowego(tzw. kropelka/superglue). Konewka składa się z dwóch głównych części, górnej i dolnej, przymocowanej do siebie magnesami neodymowymi w celu łatwego demontażu akumulatora.
+![plot](./images/print_simulation.png)
+Model drukuje się przez niecałe 4 godziny, natomiast koszt filamentu to około 5zł. Do tego kosztu dodać należy wartość 4 magnesów neodymowych tj. około 2zł.
+
 ### Lista potrzebnego sprzętu
+
+Do wykonania wykorzystane zostały następujące elementy elektroniczne:
+1) ESP32-DEV
+2) Moduł przekaźnika sterowany sygnałem 5V
+3) Przetwornica STEP-UP 12V
+4) Przetwornica STEP-DOWN 5V
+5) Pompa perystaltyczna 12V
+6) Akumulator Li-Pol 2S1P 7.4V
 
 ### Program zarządzający hardware
 
