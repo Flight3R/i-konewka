@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: ikonewka-backend-container
-        image: 192.168.0.2:5000/ikonewka_backend_image
+        image: 192.168.0.2:5000/ikonewka_backend_image:1.0.2
         env:
         - name: JWT_KEY
           valueFrom:
@@ -51,18 +51,10 @@ spec:
             secretKeyRef:
               name: ikonewka-secret
               key: MYSQL_PASSWORD
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ikonewka-backend-service
-spec:
-  selector:
-    app: ikonewka-backend
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
-      nodePort: 30001
-  type: NodePort
+          volumeMounts:
+            - mountPath: /ikonewka/storage
+              name: ikonewka-backend-pv-storage
+      volumes:
+        - name: ikonewka-backend-pv-storage
+          persistentVolumeClaim:
+            claimName: ikonewka-backend-pvc

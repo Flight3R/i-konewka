@@ -7,9 +7,15 @@ from load_credentials import load_secret
 from plantid import identify_flower, health_assessment
 from exception import JsonReadException, IsNotPlantException, PlainIdResponseException
 from chatgpt import get_flower_type_watering_details_from_openai
-from logger import logger
+import logging
+from logger import logger, log
 from helpers import is_weekday_active
 from sqlalchemy import desc
+import sys
+
+
+if __name__ == '__main__':
+    logger.setLevel(logging.DEBUG)
 
 
 app = Flask(__name__)
@@ -21,16 +27,14 @@ MYSQL_USER = load_secret("MYSQL_USER")
 MYSQL_PASSWORD = load_secret("MYSQL_PASSWORD")
 JWT_KEY = load_secret("JWT_KEY")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:3306/{MYSQL_DATABASE}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
 db = SQLAlchemy(app)
 
 app.config['JWT_SECRET_KEY'] = JWT_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 jwt = JWTManager(app)
 
-
-logger.info("iKonewka backend started successfully")
-
+log(logger.info, 'iKonewka backend started successfully')
 
 class Users(db.Model):
     __tablename__ = 'USERS'
@@ -92,6 +96,7 @@ class Images(db.Model):
 
 @app.route('/auth/register', methods=['POST'])
 def register():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         data = request.get_json()
         if any([param not in data for param in ['nick', 'email', 'password', 'watering_hour']]):
@@ -105,14 +110,17 @@ def register():
 
         db.session.add(new_user)
         db.session.commit()
-        logger.info(f'User {new_user.uid} added.')
+        uid = new_user.uid
+        log(logger.info, 'User added', uid=new_user.uid)
         return jsonify({'message': 'User added successfully'})
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/auth/login', methods=['POST'])
 def login():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         data = request.get_json()
         if any([param not in data for param in ['email', 'password']]):
@@ -122,17 +130,19 @@ def login():
                                      password=data['password']).first()
         if user:
             access_token = create_access_token(identity=user.uid)
-            logger.info(f'User {user.uid} logged in.')
+            log(logger.info, 'User logged in', uid=user.uid)
             return jsonify(access_token), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/user_information', methods=['GET'])
 @jwt_required()
 def get_user_information():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         current_user_id = get_jwt_identity()
         user_data = Users.query.filter_by(uid=current_user_id).first()
@@ -144,15 +154,14 @@ def get_user_information():
         else:
             return jsonify({'error': f'User with ID {current_user_id} not found'}), 404
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/flower', methods=['POST'])
 @jwt_required()
 def add_flower():
-    """
-    :catches JsonReadException, PlainIdResponseException, IsNotPlantException
-    """
+    log(logger.debug, sys._getframe().f_code.co_name)
     logger.debug('Flower addition request recieved.')
     try:
         data = request.get_json()
@@ -160,7 +169,7 @@ def add_flower():
 
         if any([param not in data for param in ['flower_name', 'flower_image']]):
             message = 'Missing required fields (flower_name, flower_image)'
-            logger.error(message)
+            log(logger.error, 'An error occurred', message)
             return jsonify({'error': message}), 400
 
         try:
@@ -169,27 +178,27 @@ def add_flower():
 
         except JsonReadException as e:
             message = 'Could not retrieve information from PlantId response'
-            logger.error(message)
+            log(logger.error, 'An error occurred', message)
             return jsonify({'error': message}), 504
 
         except PlainIdResponseException as e:
-            logger.error(e)
+            log(logger.error, 'An error occurred', str(e))
             return jsonify({'error': e}), 504
 
         except IsNotPlantException as e:
-            logger.error(e)
+            log(logger.error, 'An error occurred', str(e))
             return jsonify({'error': e}), 418
 
         logger.debug('Searching for flower type in database.')
 
         found_flower_type =  Flower_types.query.filter_by(name=found_flower_name).first()
         if found_flower_type:
-            logger.debug(f'Found flower type in database: {found_flower_name}.')
+            log(logger.debug, 'Found flower type in database', f'{found_flower_name=}')
             nof_watering_days = found_flower_type.nof_watering_days
             ml_per_watering = found_flower_type.ml_per_watering
             new_flower_type_id = found_flower_type.ftid
         else:
-            logger.info(f'Adding new flower type: {found_flower_name}.')
+            log(logger.info, 'Adding new flower type', flower_type=found_flower_name)
             flower_type_details = get_flower_type_watering_details_from_openai(found_flower_name)
             new_flower_type = Flower_types(name=found_flower_name,
                                            nof_watering_days=flower_type_details['nof_watering_days'],
@@ -229,14 +238,17 @@ def add_flower():
         user.nof_flowers = user.nof_flowers + 1
         db.session.commit()
 
+        log(logger.info, 'Flower added', uid=user.uid, fid=new_flower.fid)
         return jsonify({'message': {'flower_id': new_flower.fid}})
     except Exception as e:
+        log(logger.error, 'Failed to add flower', e)
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/flower/<fid>', methods=['PUT'])
 @jwt_required()
 def update_flower(fid):
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         data = request.get_json()
         current_user_id = get_jwt_identity()
@@ -257,18 +269,21 @@ def update_flower(fid):
                     setattr(flower_to_update, day, data[day])
 
             db.session.commit()
-
+            log(logger.info, 'Flower updated', f'{fid=}', uid=current_user_id)
             return jsonify({'message': f'Flower with ID {fid} updated successfully'})
         else:
+            log(logger.warning, 'Flower update prevented', f'{fid=}', uid=current_user_id)
             return jsonify({'error': f'Flower with ID {fid} not found or does not belong to the user'}), 404
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/flower/<fid>', methods=['GET'])
 @jwt_required()
 def get_flower_details(fid):
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         flower_id = fid
         current_user_id = get_jwt_identity()
@@ -302,12 +317,14 @@ def get_flower_details(fid):
             return jsonify({'error': f'Flower with ID {flower_id} not found or does not belong to the user'}), 404
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/flower/<fid>', methods=['DELETE'])
 @jwt_required()
 def delete_flower(fid):
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         current_user_id = get_jwt_identity()
 
@@ -323,17 +340,21 @@ def delete_flower(fid):
             user.nof_flowers = user.nof_flowers - 1
             db.session.commit()
 
+            log(logger.info, 'Flower deleted', f'{fid=}', uid=current_user_id)
             return jsonify({'message': f'Flower with ID {fid} deleted successfully'})
         else:
+            log(logger.warning, 'Flower deletion prevented', f'{fid=}', uid=current_user_id)
             return jsonify({'error': f'Flower with ID {fid} not found or does not belong to the user'}), 404
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/flower_photo', methods=['POST'])
 @jwt_required()
 def add_flower_photo():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         current_user_id = get_jwt_identity()
         data = request.get_json()
@@ -352,17 +373,21 @@ def add_flower_photo():
             setattr(flower, 'health', flower_health)
             db.session.commit()
 
+            log(logger.info, 'Flower image added', f'{fid=}', iid=new_image.iid, uid=current_user_id)
             return jsonify({'message': f'Image {new_image.iid} of flower {fid} added successfully'})
         else:
+            log(logger.warning, 'Flower image addition prevented', f'{fid=}', iid=new_image.iid, uid=current_user_id)
             return jsonify({'error': f'Flower with ID {fid} not found or does not belong to the user'}), 404
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/user_flowers', methods=['GET'])
 @jwt_required()
 def get_user_flowers():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         current_user_id = get_jwt_identity()
         user_flowers = Flowers.query.filter_by(uid=current_user_id).all()
@@ -396,19 +421,21 @@ def get_user_flowers():
         return jsonify({'user_flowers': flowers_list})
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/watering', methods=['POST'])
 @jwt_required()
 def add_watering():
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         data = request.get_json()
         current_user_id = get_jwt_identity()
 
         if 'fid' not in data :
             message = 'Missing required fields (fid)'
-            logger.error(message)
+            log(logger.error, 'An error occurred', message)
             return jsonify({'error': message}), 400
 
         new_watering = History(uid=current_user_id,
@@ -416,15 +443,17 @@ def add_watering():
 
         db.session.add(new_watering)
         db.session.commit()
-        logger.info(f'New watering {new_watering.hid} added.')
+        log(logger.info, 'New watering added', hid=new_watering.hid)
         return jsonify({'message': 'Watering added successfully'})
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/watering/<fid>/<nof_waterings>', methods=['GET'])
 @jwt_required()
 def get_last_watering(fid, nof_waterings):
+    log(logger.debug, sys._getframe().f_code.co_name)
     try:
         current_user_id = get_jwt_identity()
 
@@ -445,6 +474,7 @@ def get_last_watering(fid, nof_waterings):
         return jsonify({'last_waterings': waterings_list})
 
     except Exception as e:
+        log(logger.error, 'An error occurred', str(e))
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 

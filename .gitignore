@@ -1,5 +1,8 @@
 **__pycache__
+database/version
+backend/version
 backend/src/env
+backend/src/storage
 backend/src/ikonewka_backend.log
 ikonewka_secrets*
 **test*

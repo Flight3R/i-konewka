@@ -1,18 +1,24 @@
 import logging
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('ikonewka_backend.log'),
+        logging.FileHandler('storage/ikonewka_backend.log'),
         logging.StreamHandler()
     ]
 )
 
 logger = logging.getLogger(__name__)
 
-# logger.debug('This is a debug message')
-# logger.info('This is an info message')
-# logger.warning('This is a warning message')
-# logger.error('This is an error message')
-# logger.critical('This is a critical message')
+def log(logger_func, message, *args, **kwargs):
+    log_message = message
+    if args or kwargs:
+        log_message = f'{message}:'
+        if args:
+            log_message = f"{log_message} {' '.join(args)}"
+        if kwargs:
+            kwargs_message = ' '.join([f'{key}={value}' for key, value in kwargs.items()])
+            log_message = f'{log_message} {kwargs_message}'
+
+    logger_func(log_message)
