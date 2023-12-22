@@ -10,16 +10,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: "/persistent_volumes/ikonewka_mysql/mysql"
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ikonewka-mysql-pvc
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi

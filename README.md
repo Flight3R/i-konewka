@@ -116,6 +116,49 @@ Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem plat
 
 W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostało dodane przekierowanie portów umożliwiające połączenie tunelu cloudflare oraz kontenera z portem 60001.
 
+
+### Kubernetes
+
+Drugą możliwością uruchomienia aplikacji zostało wystawienie *deployment* za pośrednictwem [Kubernetes](https://kubernetes.io/). Do tego celu dopasowany został kod aplikacji: dane wrażliwe przeniesione zostały do elementu *secret* definiowanego poprzez plik `ikonewka_secrets.yaml`:
+```
+apiVersion: v1
+kind: Secret
+metadata:
+    name: ikonewka-secret
+type: Opaque
+data:
+    JWT_KEY: <key_in_base64>
+    OPENAI_API_KEY: <key_in_base64>
+    PLANTID_API_KEY: <key_in_base64>
+    MYSQL_HOST: <host_in_base64>
+    MYSQL_DATABASE: <database_in_base64>
+    MYSQL_USER: <user_in_base64>
+    MYSQL_PASSWORD: <password_in_base64>
+```
+Dodatkowo, zarówno dla części *backend* oraz *database* utworzono pliki .yaml definiujące potrzebne komponenty w *Kubernetes*.
+Aby zrealizować wdrożenie wystarczy uruchomić w każdym z komponentów plik `Makefile` korzystając z polecenia `make prod`.
+
+Po zbudowaniu, otagowaniu oraz wypchnięciu obrazu do repozytorium można uruchomić procesy w *Kubernetes*:
+
+```
+kubectl apply -f ikonewka_secrets.yaml
+```
+
+* backend
+    ```
+    kubectl apply -f ikonewka_backend_persistentvolume.yaml
+    kubectl apply -f ikonewka_backend_persistentvolumeclaim.yaml
+    kubectl apply -f ikonewka_backend_deployment.yaml
+    ```
+
+* database
+    ```
+    kubectl apply -f ikonewka_mysql_persistentvolume.yaml
+    kubectl apply -f ikonewka_mysql_persistentvolumeclaim.yaml
+    kubectl apply -f ikonewka_mysql_service.yaml
+    kubectl apply -f ikonewka_mysql_deployment.yaml
+    ```
+
 ### Cloudflare
 
 Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z wykorzystaniem usugi [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie 60001. Dzięki tunelowaniu ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
@@ -129,6 +172,7 @@ Model drukuje się przez niecałe 4 godziny, natomiast koszt filamentu to około
 ### Lista potrzebnego sprzętu
 
 Do wykonania wykorzystane zostały następujące elementy elektroniczne:
+
 1) ESP32-DEV
 2) Moduł przekaźnika sterowany sygnałem 5V
 3) Przetwornica STEP-UP 12V
@@ -150,8 +194,9 @@ Zaczynając od początku zostały stworzone trzy różne persony, które mają r
 Podczas pracy nad aplikacją staraliśmy się odpowiadać na żądania oraz obawy potencjalnych użytkowników względem aplikacji, aby byli skorzy ją wykorzystać do codziennego użycia. To doskonale pokazuje, że nasz projekt jest zdecydowanie skierowany na użytkownika końcowegom co jest niezwykle istotne w tworzeniu aplikacji mobilnych, które mają być łatwe oraz przyjemne w obsłudze.
 
 Poniżej przedstawiamy parę kluczowych wniosków, które zostały wyciągnięte po szczegółowej ankiecie przeprowadzonej w trzech kwiaciarniach:
+
 1) Kluczowa jest monitorowanie oraz analiza stanu rośliny, aby wykryć wszelkie nieprawidłowości już na samym początku problemów.
-2) Niezwykle istotny jest fakt, że korzystanie z I-konewki pozwoliłoby zaoszczędzić czas, pieniądze oraz zmniejszyć stres zarówno u profesjonalistów jak i wśród domowych amatorów roślin. 
+2) Niezwykle istotny jest fakt, że korzystanie z I-konewki pozwoliłoby zaoszczędzić czas, pieniądze oraz zmniejszyć stres zarówno u profesjonalistów jak i wśród domowych amatorów roślin.
 3) W 99% przypadków problemem rośliny jest jej nieprawidłowa pielęgnacja czy podlewanie, a korzystanie z automatycznej i inteligentnej konewki pozwoliłoby zredukować liczbę takich przypadków przynajmniej kilkukrotnie.
 4) Rozpoznawanie kwiatów pozwoliłoby natychmiastowo dowiedzieć się prawdziwej nazwy rośliny oraz jej wymagań, co umożliwiłoby szybszą reakcję na problemy niż powolne przeszukiwanie Internetu.
 
