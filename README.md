@@ -221,6 +221,18 @@ Poniżej przedstawiamy parę kluczowych wniosków, które zostały wyciągnięte
 3) W 99% przypadków problemem rośliny jest jej nieprawidłowa pielęgnacja czy podlewanie, a korzystanie z automatycznej i inteligentnej konewki pozwoliłoby zredukować liczbę takich przypadków przynajmniej kilkukrotnie.
 4) Rozpoznawanie kwiatów pozwoliłoby natychmiastowo dowiedzieć się prawdziwej nazwy rośliny oraz jej wymagań, co umożliwiłoby szybszą reakcję na problemy niż powolne przeszukiwanie Internetu.
 
+Przeprowadzono również ankietę Google, która została udostepniona na Facebooku i w kręgach znajomych, rodziny.
+
+Prawie wszyscy ankietowani posiadają kwiaty w swoich domach, a co ciekawe, prawie 70% z nich uważa,
+że ich wiedza na ten temat jest niewystarczająca. Najbardziej interesujące są odpowiedzi na pytania
+takie jak "Jak dobrym opiekunem kwiatów jesteś?", gdzie ponad połowa ankietowanych udzieliła
+odpowiedzi na poziomie 1 lub 2 na 5, oraz "Jaki jest stan Twojej wiedzy o kwiatach?", na które 41.2%
+osób zaznaczyło 1/5. Tylko połowa odpowiedzi wskazywała na to, że kupujący szukają dodatkowych
+informacji po zakupie, a co więcej, najczęściej robią to w internecie. Interesujące jest to, że 32.7%
+ankietowanych na pytanie "Jak często podlewasz kwiaty?" odpowiedziało: "Kiedy mi się przypomni."
+Ponad połowa odpowiedzi pokazuje, że sytuacje, w których potrzebna jest opieka nad kwiatami, wciąż
+się zdarzają.
+
 ## Wykorzystane narzędzia
 
 * [openAI](https://platform.openai.com/docs/introduction)
