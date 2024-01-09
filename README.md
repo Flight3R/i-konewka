@@ -209,6 +209,23 @@ Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicz
 
 <div style="page-break-after: always;"></div>
 
+## Aplikacja
+
+### Obsługa kamery
+Korzystano między innymi z pakiety _package:camera_, który służy do obsługi funkcji kamery.
+Początkowo wykrywane są wszystkie kamery w urządzeniu (komputer, laptop, telefon, tablet), a następnie wybierana jest domyślna z nich. Jak obsłużenie działania kamery zostało już zainicjowane, wyświetlany jest podgląd kamery _CameraPreview_, w przeciwnym razie widoczny jest wskaźnik postępu _CircularProgressIndicator_.
+Rozdzielczość wykonywania zdjęć jest ustalona na charakterystyczną dla uprzednio wybranej kamery, aby zdjęcia były wykonywane w odpowiedniej jakości np. _ResolutionPreset.high_.
+Obraz z kamery jest jednocześnie wyświetlany na ekranie użytkownika, aby był on w stanie stwierdzić czy na nim widać cały interesujący nas obiekt.
+Po wciśnięciu odpowiedniego przycisku znajdującego się na dole strony, wykonywane jest zdjęcie, które następnie jest zapisywane do pamięci podręcznej urządzenia. 
+Na samym końcu metoda dispose zamyka kontroler kamery, aby zwolnić zasoby podczas usuwania widoku.
+
+### Wysyłanie żądań/zapytań do API z poziomu darta
+Korzystano między innymi z pakietu _package:http_.
+Została zdefiniowana klasa ApiHelper, która zawiera metody do wykonywania żądań HTTP (GET, POST, PUT) wraz z możliwością autoryzacji. Klasa ta przyjmuje bazowy URL podczas inicjalizacji np. [Backend API](https://ikonewka.panyre.pl). Na podstawie podanego linku umożliwia się wysyłanie różnych rodzajów zapytań do tego URL wraz z odpowiednimi parametrami np. user i hasło czy dodatkowe informacje o obsługiwanych roślinach.
+Po wykonaniu zdjęcia z pomocą pakietu _camera_ jest ono przetwarzane i kodowane _Base64_. Po udanej takiej operacji jest ono przesyłane za pomocą metod HTTP do API narzędzia PlantId udostępnionego nam przez firmę kindwise.
+Dodatkowo metody HTTP obsługują odpowiednio usuwanie, dodawanie czy edytowanie informacji o roślinach użytkownika w naszej aplikacji. Wszystkie metody (GET, POST, PUT) zwracają mapę zawierającą dane z odpowiedzi HTTP. W przypadku sukcesu (kod statusu 200), mapa zawiera otrzymane dane, a w przeciwnym razie rzucany jest wyjątek. Wynik każdego żądania jest przekazywany do prywatnej metody __handleResponse_, która obsługuje odpowiedzi HTTP, parsuje dane JSON i dodatkowo jest w stanie odpowiedzieć na ewentualne błędy.
+
+
 ## Rozeznanie rynku
 
 Podczas prac nad aplikacją zdecydowaliśmy się przeprowadzić pełną analizę rynku, która pozwoliła nam scharakteryzować potencjalnych klientów (persony) aplikacji oraz opinie ekspertów od opieki nad roślinami.
