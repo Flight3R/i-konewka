@@ -16,7 +16,29 @@ Cały system składa się z aplikacji mobilnej, którą użytkownik instaluje na
 
 Aplikacja Flutter zaprojektowana w celu wsparcia urządzenia do podlewania poprzez dodanie kontroli i logiki. Użytkownik może utworzyć konto, w którym może przechowywać informacje o swoich roślinach, z różnymi atrybutami. Kamera zainstalowana w smartfonie może być używana do identyfikacji kwiatów użytkownika. Dzięki silnikowi identyfikacji roślin i oceny zdrowia dostarczanemu przez API PlantId.
 
-### Połaczenie bluetooth
+### Arduino
+
+W naszym projekcie używamy płytki Arduino ESP32. Używamy domyślnej biblioteki Arduino i biblioteki BluetoothSerial do połączeń Bluetooth. Pompa jest podłączona do Arduino na pinie 2.
+
+#### Połączenie Bluetooth
+Każde polecenie zawiera **head** i **value**. Żadne z nich nie powinno przekraczać długości 100 znaków. Są one odbierane jako zwykły tekst i oddzielone spacją. Istnieją dwie komendy, które można wykonać na karcie:
+- connect - nie ma wartości i zwraca tekst "ok". Służy do upewnienia się, że jesteś podłączony do dobrego urządzenia.
+- water - zawiera wartość całkowitą jako liczbę mililitrów, które zostaną przepompowane. Nie zwraca żadnej wartości 
+
+#### Kod
+Kod Arduino jest podzielony na trzy kluczowe segmenty: 
+- Setup - część kodu, która działa raz, po uruchomieniu Arduino. W naszym kodzie definiujemy pin pompy jako wyjście cyfrowe i otwieramy szeregowy Bluetooth.
+
+- Loop - ta część kodu działa w pętli po konfiguracji. W każdej iteracji sprawdzamy dostępność szeregowego Bluetooth i odbieramy polecenia. Główną częścią kodu jest nawadnianie, wywoływane poleceniem "water". Jego parametrem jest liczba mililitrów, przeliczana na liczbę milisekund pracy pompy przez stałą PUMP_CAPACITY = 0,0015 [ml/msec]. Wykonywanie nawadniania nie jest blokowane. Oznacza to, że gdy nawadnianie jest włączone, Arduino nie czeka na zakończenie nawadniania i może wykonywać inne czynności. Mierzy czas w każdej iteracji i odejmuje go od całkowitego czasu, przez jaki pompa powinna być włączona. Gdy czas ten dojdzie do zera, nawadnianie zostanie zatrzymane.
+
+#### Klasa Command
+Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicznych metod:
+- read - odczytuje dane z portu szeregowego i dzieli je na dwie tablice znaków: nagłówek i wartość (każda o maksymalnej długości 100 znaków).
+- is - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy nagłówek jest równy tablicy wejściowej
+- isVal - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy wartość jest równa tablicy wejściowej
+- valToInt - próbuje przekonwertować wartość z tablicy znaków na liczbę całkowitą 
+
+
 
 ### API i-konewka
 
