@@ -211,6 +211,15 @@ Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicz
 
 ## Aplikacja
 
+### Projekt aplikacji w Figmie
+Pierwszym etapem dostarczania aplikacji było wykonanie wstępnego szkicu projektu. Zaprojektowaliśmy trzy ekrany - logowanie i rejestracja zostały pominięte:
+- Ekran główny (_Home_), w którym znajdują się widgety z kwiatkami użytkownika
+- Ekran dodawania kwiatka (_AddPlant_), umożliwiający dodanie rośliny
+- Ekran edycji kwiatka (_EditPlant_), pozwalający na zmianę parametrów danej rośliny.
+
+Choć finalna wersja aplikacji odbiega od szkicu, to zachowane zostały kluczowe elementy zamieszczone w prototypie:
+![plot](./images/figma.png)
+
 ### Obsługa kamery
 Korzystano między innymi z pakiety _package:camera_, który służy do obsługi funkcji kamery.
 Początkowo wykrywane są wszystkie kamery w urządzeniu (komputer, laptop, telefon, tablet), a następnie wybierana jest domyślna z nich. Jak obsłużenie działania kamery zostało już zainicjowane, wyświetlany jest podgląd kamery _CameraPreview_, w przeciwnym razie widoczny jest wskaźnik postępu _CircularProgressIndicator_.
@@ -225,6 +234,123 @@ Została zdefiniowana klasa ApiHelper, która zawiera metody do wykonywania żą
 Po wykonaniu zdjęcia z pomocą pakietu _camera_ jest ono przetwarzane i kodowane _Base64_. Po udanej takiej operacji jest ono przesyłane za pomocą metod HTTP do API narzędzia PlantId udostępnionego nam przez firmę kindwise.
 Dodatkowo metody HTTP obsługują odpowiednio usuwanie, dodawanie czy edytowanie informacji o roślinach użytkownika w naszej aplikacji. Wszystkie metody (GET, POST, PUT) zwracają mapę zawierającą dane z odpowiedzi HTTP. W przypadku sukcesu (kod statusu 200), mapa zawiera otrzymane dane, a w przeciwnym razie rzucany jest wyjątek. Wynik każdego żądania jest przekazywany do prywatnej metody __handleResponse_, która obsługuje odpowiedzi HTTP, parsuje dane JSON i dodatkowo jest w stanie odpowiedzieć na ewentualne błędy.
 
+### Obsługa Bluetooth
+Aplikacja korzysta z biblioteki do obsługi Bluetooth Classic do przesyłania danych po połączniu serialowym. W trakcie projektowania interfejsu Bluetooth zmieniała się koncepcja rozwiązania wraz z narzędziami. Użycie BT Classic wymusiło wykorzystanie niesprawdzonych i przestarzałych bibliotek Flutterowych. Wstępna wersja aplikacji wraz z interfejsem debugowym, pozwalającym m.in. wysłanie spreparowanych komend do Arduino przy testach end-to-end okazała się nie realizować postawionych zadań - tutaj jako powód wytypowano i potwierdzono przestarzałość biblioteki _flutter_bluetooth_classis_. Wiekowość Bluetooth Classic i niewiele dostępnych (raptem jedna) biblioteka do obsługi tego systemu wymusiło skorzystanie z nieprzetestowanej biblioteki _bluetooth_classic_ w wersji 0.0.1 z raptem 7 like'ami. Okrojony format, brak obsługi błędów i dostępu do sterowania strumieniami do obsługi zdarzeń (zmiana statusu urządzenia, podsłuchiwanie danych otrzymanych na połączenie serialowe) poskutkowało równie okrojonym interfejsem BT.
+Obie z podstron 'Debug BT' i 'Home' korzystają z własnych uchwytów do obsługi BT - wszelkie próby zaimplementowania Singletona się nie powiodły.
+
+Wybrana biblioteka niespodziewanie zadziałała (została dostarczona w październiku 2023 i wykorzystywała wspierane API Androida, w przeciwieństwie do wcześniejszej biblioteki) - koniecznie jednak dodanie było zmiennej globalnej śledzącej, czy otwarty został listener na zmiany statusu BT - powtórne dodanie listenera skutkowało zatrzymaniem aplikacji:
+
+* main.dart
+```
+bool IS_LISTENED_TO = false;
+```
+* 'Home' / 'Debug BT'
+```
+if (!IS_LISTENED_TO) {
+  BT_DEV.onDeviceStatusChanged().listen((event) {
+    setState(() {
+      _DEVICE_STATUS = event;
+    });
+  });
+  IS_LISTENED_TO = true;
+}
+```
+
+Dodatkowo na finalnym etapie testowania aplikacji na telefonie z Androidem 13 pojawił się problem z łącznościom BT. Okazało się, że w API 34 Androida konieczne jest przyznanie aplikacjo dostępu do funkcji skanowania otoczenia. Realizujemy to poniższym fragmentem kodu:
+
+```
+Future<void> initPermissionsApi34() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothAdvertise
+    ].request();
+
+    if (statuses[Permission.bluetoothScan] == PermissionStatus.granted &&
+        statuses[Permission.bluetoothAdvertise] == PermissionStatus.granted) {
+      setState(() {
+        _bluetoothPermissions = true;
+      });
+    }
+  }
+```
+
+Pierwsze próby połączeniu z Arduino realizowane jest po poprawnym zalogowaniu. Po przejściu do podstrony 'Home' w tle wywoływana jest asynchroniczna metoda _initConnection_ łącząca aplikację z Arduino poprzez standaryzowanym serwis UUID dla połączeń serialowych: **00001101-0000-1000-8000-00805f9b34fb **. Metoda aktualizuje status połączenia, który wykorzystywany jest do obsługi ewentualnych błędów, czy prób podlania kwiatka bez uprzedniego sparowania urządzenia.
+```
+  Future<void> initConnection() async {
+    await BT_DEV.connect(deviceAddress, defaultUuid).then((bool result) {
+      setState(() {
+        connectionUp = result;
+      });
+    });
+  }
+```
+
+W przypadku braku połączenia użytkownik promptowany jest o ponowienie próby połączenia z Arduino poprzez stosowny alert. Po kliknięciu w przycisk wywoływana jest medoda __initConnectionProcess_, łącząca aplikację ze sprzętem.
+
+```
+Alert(
+            type: AlertType.error,
+            style: CustomAlertStyle.alertStyle,
+            context: context,
+            title: "Cannot water the plant",
+            desc: "Please make sure the device is connected before watering.",
+            buttons: [
+              DialogButton(
+                onPressed:
+                    !_connectionInProgress ? _initConnectionProcess : null,
+                color: Colors.red,
+                child: const Text(
+                  "OK, redo connection",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20),
+                ),
+              ),
+            ],
+          ).show();
+...
+
+Future<void> _initConnectionProcess() async {
+    _connectionInProgress = true;
+    await initConnection();
+    if (!context.mounted) return;
+    Navigator.pop(context);
+    _connectionInProgress = false;
+  }
+
+```
+
+Kod realizujący podlewanie kwiatków opatrzony jest dodatkowo o stosowne alerty, aktualizowane o wartość wyjątku, który może pojawić się podczas próby pisania do Arduino. Obsłużone są zarówno wyjątki dotyczące podlewania, kiedy sprzęt nie został sparowany, jak i wyjątki samego pisania do zdalnego urządzenia.
+```
+Future<void> _sendWaterProcess() async {
+    _waterInProgress = true;
+    var popUp = CustomLoadingPopUp(context: context);
+    popUp.show();
+    var result = await sendWater("${widget.waterAmount}", BT_DEV);
+    var errorPopUp;
+    switch (result) {
+      case 0:
+        break;
+      case 1:
+        errorPopUp = CustomErrorPopUp(context: context, reason: 'connecting');
+        break;
+      case 2:
+        errorPopUp = CustomErrorPopUp(context: context, reason: 'watering');
+        break;
+      default:
+        break;
+    }
+    popUp.dismiss();
+
+    if (!context.mounted) return;
+    Navigator.pop(context);
+    if (errorPopUp != null) {
+      errorPopUp.show();
+    }
+    _waterInProgress = false;
+  }
+```
 
 ## Rozeznanie rynku
 
