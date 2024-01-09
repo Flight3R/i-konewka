@@ -6,42 +6,25 @@ Innowacyjna konewka do nawadniania roślin, wyposażona w rozpoznawanie gatunku 
 
 Cały system składa się z aplikacji mobilnej, którą użytkownik instaluje na swoim smartfonie, urządzenia IoT zawierającego mikroprocesor oraz pompy umożliwiającej podawanie wody roślinom.
 
-## Schemat projektu
-
-![plot](./images/scheme.png)
+<div style="page-break-after: always;"></div>
 
 ## Dokumentacja
+
+### Schemat projektu
+
+Projekt składa się z pięciu głównych części zaprezentowanych na rysunku poniżej. Każdą z nich opisano w tym dokumencie. Dodano też sposób komunikacji między konkretnymi modułami.
+
+![plot](./images/scheme.png)
 
 ### Aplikacja mobilna
 
 Aplikacja Flutter zaprojektowana w celu wsparcia urządzenia do podlewania poprzez dodanie kontroli i logiki. Użytkownik może utworzyć konto, w którym może przechowywać informacje o swoich roślinach, z różnymi atrybutami. Kamera zainstalowana w smartfonie może być używana do identyfikacji kwiatów użytkownika. Dzięki silnikowi identyfikacji roślin i oceny zdrowia dostarczanemu przez API PlantId.
 
-### Arduino
-
-Używamy płytki Arduino ESP32 oraz biblioteki BluetoothSerial do połączeń Bluetooth. Pompa jest podłączona do Arduino na pinie 2.
-
-#### Połączenie Bluetooth
-Każde polecenie zawiera **head** i **value**. Żadne z nich nie powinno przekraczać długości 100 znaków. Są one odbierane jako zwykły tekst i oddzielone spacją. Istnieją dwie komendy, które można wykonać:
-- connect - nie ma wartości i zwraca tekst "ok". Służy do upewnienia się, że jesteś podłączony do dobrego urządzenia.
-- water - zawiera wartość całkowitą jako liczbę mililitrów, które zostaną przepompowane. Nie zwraca żadnej wartości 
-
-#### Kod
-Kod Arduino jest podzielony na trzy kluczowe segmenty: 
-- setup - część kodu, która działa raz, po uruchomieniu Arduino. W naszym kodzie definiujemy pin pompy jako wyjście cyfrowe i otwieramy szeregowy Bluetooth.
-- loop - ta część kodu działa w pętli po konfiguracji. W każdej iteracji sprawdzamy dostępność szeregowego Bluetooth i odbieramy polecenia. Główną częścią kodu jest nawadnianie, wywoływane poleceniem "water". Jego parametrem jest liczba mililitrów, przeliczana na liczbę milisekund pracy pompy przez stałą PUMP_CAPACITY = 0,0015 [ml/msec]. Wykonywanie nawadniania nie jest blokowane. Oznacza to, że gdy nawadnianie jest włączone, Arduino nie czeka na zakończenie nawadniania i może wykonywać inne czynności. Mierzy czas w każdej iteracji i odejmuje go od całkowitego czasu, przez jaki pompa powinna być włączona. Gdy czas ten dojdzie do zera, nawadnianie zostanie zatrzymane.
-
-#### Klasa Command
-Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicznych metod:
-- read - odczytuje dane z portu szeregowego i dzieli je na dwie tablice znaków: nagłówek i wartość (każda o maksymalnej długości 100 znaków).
-- is - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy nagłówek jest równy tablicy wejściowej
-- isVal - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy wartość jest równa tablicy wejściowej
-- valToInt - próbuje przekonwertować wartość z tablicy znaków na liczbę całkowitą 
-
-
-
 ### API i-konewka
 
 Część "backend" projektu i-konewka została wykonana z użyciem frameworka [Flask](https://flask.palletsprojects.com/). Został on wybrany ze względu na niewielki narzut oraz prostotę, która została postawiona postawiona ponad skomplikowanie innych rozwiązań wykorzystywanych w tej dziedzinie. Łatwa do użycia składnia Flaska pozoliła nam w stosunkowo krótkim czasie wytworzyć w pełni fnkcjonalną oraz poprawną w kontekście rozwoju aplikację. Wszystkie założone w projekcie funkcjonalności zostały zaimplementowane.
+
+<div style="page-break-after: always;"></div>
 
 Lista endpoit'ów:
 
@@ -184,10 +167,12 @@ kubectl apply -f ikonewka_secrets.yaml
 
 Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z wykorzystaniem usugi [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie 60001. Dzięki tunelowaniu ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
 
-### Fizyczne urządzenie
+<div style="page-break-after: always;"></div>
+
+## Fizyczne urządzenie
 
 Budowa urządzenia zoptymalizowana została w celu możliwości szybkiego i taniego wydruku w technologii druku 3D. Model został podzielony na kilka mniejszych elementów dla uniknięcia przymusu druku supportów(materiału wsparciowego). Montaż jest prosty do wykonania przy pomocy kleju cyjanoakrylowego(tzw. kropelka/superglue). Konewka składa się z dwóch głównych części, górnej i dolnej, przymocowanej do siebie magnesami neodymowymi w celu łatwego demontażu akumulatora.
-![plot](./images/print_simulation.png)
+![plot](./images/konewka.jpg)
 Model drukuje się przez niecałe 4 godziny, natomiast koszt filamentu to około 5zł. Do tego kosztu dodać należy wartość 4 magnesów neodymowych tj. około 2zł.
 
 ### Lista potrzebnego sprzętu
@@ -201,7 +186,28 @@ Do wykonania wykorzystane zostały następujące elementy elektroniczne:
 5) Pompa perystaltyczna 12V
 6) Akumulator Li-Pol 2S1P 7.4V
 
-### Program zarządzający hardware
+### Arduino
+
+Używamy płytki Arduino ESP32 oraz biblioteki BluetoothSerial do połączeń Bluetooth. Pompa jest podłączona do Arduino na pinie 2.
+
+#### Połączenie Bluetooth
+Każde polecenie zawiera **head** i **value**. Żadne z nich nie powinno przekraczać długości 100 znaków. Są one odbierane jako zwykły tekst i oddzielone spacją. Istnieją dwie komendy, które można wykonać:
+- connect - nie ma wartości i zwraca tekst "ok". Służy do upewnienia się, że jesteś podłączony do dobrego urządzenia.
+- water - zawiera wartość całkowitą jako liczbę mililitrów, które zostaną przepompowane. Nie zwraca żadnej wartości 
+
+#### Kod
+Kod Arduino jest podzielony na trzy kluczowe segmenty: 
+- setup - część kodu, która działa raz, po uruchomieniu Arduino. W naszym kodzie definiujemy pin pompy jako wyjście cyfrowe i otwieramy szeregowy Bluetooth.
+- loop - ta część kodu działa w pętli po konfiguracji. W każdej iteracji sprawdzamy dostępność szeregowego Bluetooth i odbieramy polecenia. Główną częścią kodu jest nawadnianie, wywoływane poleceniem "water". Jego parametrem jest liczba mililitrów, przeliczana na liczbę milisekund pracy pompy przez stałą PUMP_CAPACITY = 0,0015 [ml/msec]. Wykonywanie nawadniania nie jest blokowane. Oznacza to, że gdy nawadnianie jest włączone, Arduino nie czeka na zakończenie nawadniania i może wykonywać inne czynności. Mierzy czas w każdej iteracji i odejmuje go od całkowitego czasu, przez jaki pompa powinna być włączona. Gdy czas ten dojdzie do zera, nawadnianie zostanie zatrzymane.
+
+#### Klasa Command
+Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicznych metod:
+- read - odczytuje dane z portu szeregowego i dzieli je na dwie tablice znaków: nagłówek i wartość (każda o maksymalnej długości 100 znaków).
+- is - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy nagłówek jest równy tablicy wejściowej
+- isVal - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy wartość jest równa tablicy wejściowej
+- valToInt - próbuje przekonwertować wartość z tablicy znaków na liczbę całkowitą 
+
+<div style="page-break-after: always;"></div>
 
 ## Rozeznanie rynku
 
@@ -239,6 +245,8 @@ się zdarzają.
 * [PlantId](https://plant.id/)
 * [Flutter](https://flutter.dev/)
 * [Flask](https://flask.palletsprojects.com/)
+
+<div style="page-break-after: always;"></div>
 
 ## Możliwy rozwój
 
