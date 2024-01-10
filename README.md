@@ -120,10 +120,10 @@ Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem plat
 
 W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostało dodane przekierowanie portów umożliwiające połączenie tunelu cloudflare oraz kontenera z portem 60001.
 
-
 ### Kubernetes
 
 Drugą możliwością uruchomienia aplikacji zostało wystawienie *deployment* za pośrednictwem [Kubernetes](https://kubernetes.io/). Do tego celu dopasowany został kod aplikacji: dane wrażliwe przeniesione zostały do elementu *secret* definiowanego poprzez plik `ikonewka_secrets.yaml`:
+
 ```
 apiVersion: v1
 kind: Secret
@@ -139,6 +139,7 @@ data:
     MYSQL_USER: <user_in_base64>
     MYSQL_PASSWORD: <password_in_base64>
 ```
+
 Dodatkowo, zarówno dla części *backend* oraz *database* utworzono pliki .yaml definiujące potrzebne komponenty w *Kubernetes*.
 Aby zrealizować wdrożenie wystarczy uruchomić w każdym z komponentów plik `Makefile` korzystając z polecenia `make prod`.
 
@@ -149,6 +150,7 @@ kubectl apply -f ikonewka_secrets.yaml
 ```
 
 * backend
+
     ```
     kubectl apply -f ikonewka_backend_persistentvolume.yaml
     kubectl apply -f ikonewka_backend_persistentvolumeclaim.yaml
@@ -156,6 +158,7 @@ kubectl apply -f ikonewka_secrets.yaml
     ```
 
 * database
+
     ```
     kubectl apply -f ikonewka_mysql_persistentvolume.yaml
     kubectl apply -f ikonewka_mysql_persistentvolumeclaim.yaml
@@ -191,60 +194,70 @@ Do wykonania wykorzystane zostały następujące elementy elektroniczne:
 Używamy płytki Arduino ESP32 oraz biblioteki BluetoothSerial do połączeń Bluetooth. Pompa jest podłączona do Arduino na pinie 2.
 
 #### Połączenie Bluetooth
+
 Każde polecenie zawiera **head** i **value**. Żadne z nich nie powinno przekraczać długości 100 znaków. Są one odbierane jako zwykły tekst i oddzielone spacją. Istnieją dwie komendy, które można wykonać:
-- connect - nie ma wartości i zwraca tekst "ok". Służy do upewnienia się, że jesteś podłączony do dobrego urządzenia.
-- water - zawiera wartość całkowitą jako liczbę mililitrów, które zostaną przepompowane. Nie zwraca żadnej wartości 
+* connect - nie ma wartości i zwraca tekst "ok". Służy do upewnienia się, że jesteś podłączony do dobrego urządzenia.
+* water - zawiera wartość całkowitą jako liczbę mililitrów, które zostaną przepompowane. Nie zwraca żadnej wartości
 
 #### Kod
-Kod Arduino jest podzielony na trzy kluczowe segmenty: 
-- setup - część kodu, która działa raz, po uruchomieniu Arduino. W naszym kodzie definiujemy pin pompy jako wyjście cyfrowe i otwieramy szeregowy Bluetooth.
-- loop - ta część kodu działa w pętli po konfiguracji. W każdej iteracji sprawdzamy dostępność szeregowego Bluetooth i odbieramy polecenia. Główną częścią kodu jest nawadnianie, wywoływane poleceniem "water". Jego parametrem jest liczba mililitrów, przeliczana na liczbę milisekund pracy pompy przez stałą PUMP_CAPACITY = 0,0015 [ml/msec]. Wykonywanie nawadniania nie jest blokowane. Oznacza to, że gdy nawadnianie jest włączone, Arduino nie czeka na zakończenie nawadniania i może wykonywać inne czynności. Mierzy czas w każdej iteracji i odejmuje go od całkowitego czasu, przez jaki pompa powinna być włączona. Gdy czas ten dojdzie do zera, nawadnianie zostanie zatrzymane.
+
+Kod Arduino jest podzielony na trzy kluczowe segmenty:
+* setup - część kodu, która działa raz, po uruchomieniu Arduino. W naszym kodzie definiujemy pin pompy jako wyjście cyfrowe i otwieramy szeregowy Bluetooth.
+* loop - ta część kodu działa w pętli po konfiguracji. W każdej iteracji sprawdzamy dostępność szeregowego Bluetooth i odbieramy polecenia. Główną częścią kodu jest nawadnianie, wywoływane poleceniem "water". Jego parametrem jest liczba mililitrów, przeliczana na liczbę milisekund pracy pompy przez stałą PUMP_CAPACITY = 0,0015 [ml/msec]. Wykonywanie nawadniania nie jest blokowane. Oznacza to, że gdy nawadnianie jest włączone, Arduino nie czeka na zakończenie nawadniania i może wykonywać inne czynności. Mierzy czas w każdej iteracji i odejmuje go od całkowitego czasu, przez jaki pompa powinna być włączona. Gdy czas ten dojdzie do zera, nawadnianie zostanie zatrzymane.
 
 #### Klasa Command
+
 Ta klasa służy do interpretowania poleceń wejściowych. Posiada kilka publicznych metod:
-- read - odczytuje dane z portu szeregowego i dzieli je na dwie tablice znaków: nagłówek i wartość (każda o maksymalnej długości 100 znaków).
-- is - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy nagłówek jest równy tablicy wejściowej
-- isVal - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy wartość jest równa tablicy wejściowej
-- valToInt - próbuje przekonwertować wartość z tablicy znaków na liczbę całkowitą 
+* read - odczytuje dane z portu szeregowego i dzieli je na dwie tablice znaków: nagłówek i wartość (każda o maksymalnej długości 100 znaków).
+* is - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy nagłówek jest równy tablicy wejściowej
+* isVal - pobiera tablicę znaków jako dane wejściowe i sprawdza, czy wartość jest równa tablicy wejściowej
+* valToInt - próbuje przekonwertować wartość z tablicy znaków na liczbę całkowitą
 
 <div style="page-break-after: always;"></div>
 
 ## Aplikacja
 
 ### Projekt aplikacji w Figmie
+
 Pierwszym etapem dostarczania aplikacji było wykonanie wstępnego szkicu projektu. Zaprojektowaliśmy trzy ekrany - logowanie i rejestracja zostały pominięte:
-- Ekran główny (_Home_), w którym znajdują się widgety z kwiatkami użytkownika
-- Ekran dodawania kwiatka (_AddPlant_), umożliwiający dodanie rośliny
-- Ekran edycji kwiatka (_EditPlant_), pozwalający na zmianę parametrów danej rośliny.
+* Ekran główny (*Home*), w którym znajdują się widgety z kwiatkami użytkownika
+* Ekran dodawania kwiatka (*AddPlant*), umożliwiający dodanie rośliny
+* Ekran edycji kwiatka (*EditPlant*), pozwalający na zmianę parametrów danej rośliny.
 
 Choć finalna wersja aplikacji odbiega od szkicu, to zachowane zostały kluczowe elementy zamieszczone w prototypie:
 ![plot](./images/figma.png)
 
 ### Obsługa kamery
-Korzystano między innymi z pakiety _package:camera_, który służy do obsługi funkcji kamery.
-Początkowo wykrywane są wszystkie kamery w urządzeniu (komputer, laptop, telefon, tablet), a następnie wybierana jest domyślna z nich. Jak obsłużenie działania kamery zostało już zainicjowane, wyświetlany jest podgląd kamery _CameraPreview_, w przeciwnym razie widoczny jest wskaźnik postępu _CircularProgressIndicator_.
-Rozdzielczość wykonywania zdjęć jest ustalona na charakterystyczną dla uprzednio wybranej kamery, aby zdjęcia były wykonywane w odpowiedniej jakości np. _ResolutionPreset.high_.
+
+Korzystano między innymi z pakiety *package:camera*, który służy do obsługi funkcji kamery.
+Początkowo wykrywane są wszystkie kamery w urządzeniu (komputer, laptop, telefon, tablet), a następnie wybierana jest domyślna z nich. Jak obsłużenie działania kamery zostało już zainicjowane, wyświetlany jest podgląd kamery *CameraPreview*, w przeciwnym razie widoczny jest wskaźnik postępu *CircularProgressIndicator*.
+Rozdzielczość wykonywania zdjęć jest ustalona na charakterystyczną dla uprzednio wybranej kamery, aby zdjęcia były wykonywane w odpowiedniej jakości np. *ResolutionPreset.high*.
 Obraz z kamery jest jednocześnie wyświetlany na ekranie użytkownika, aby był on w stanie stwierdzić czy na nim widać cały interesujący nas obiekt.
-Po wciśnięciu odpowiedniego przycisku znajdującego się na dole strony, wykonywane jest zdjęcie, które następnie jest zapisywane do pamięci podręcznej urządzenia. 
+Po wciśnięciu odpowiedniego przycisku znajdującego się na dole strony, wykonywane jest zdjęcie, które następnie jest zapisywane do pamięci podręcznej urządzenia.
 Na samym końcu metoda dispose zamyka kontroler kamery, aby zwolnić zasoby podczas usuwania widoku.
 
 ### Wysyłanie żądań/zapytań do API z poziomu darta
-Korzystano między innymi z pakietu _package:http_.
+
+Korzystano między innymi z pakietu *package:http*.
 Została zdefiniowana klasa ApiHelper, która zawiera metody do wykonywania żądań HTTP (GET, POST, PUT) wraz z możliwością autoryzacji. Klasa ta przyjmuje bazowy URL podczas inicjalizacji np. [Backend API](https://ikonewka.panyre.pl). Na podstawie podanego linku umożliwia się wysyłanie różnych rodzajów zapytań do tego URL wraz z odpowiednimi parametrami np. user i hasło czy dodatkowe informacje o obsługiwanych roślinach.
-Po wykonaniu zdjęcia z pomocą pakietu _camera_ jest ono przetwarzane i kodowane _Base64_. Po udanej takiej operacji jest ono przesyłane za pomocą metod HTTP do API narzędzia PlantId udostępnionego nam przez firmę kindwise.
-Dodatkowo metody HTTP obsługują odpowiednio usuwanie, dodawanie czy edytowanie informacji o roślinach użytkownika w naszej aplikacji. Wszystkie metody (GET, POST, PUT) zwracają mapę zawierającą dane z odpowiedzi HTTP. W przypadku sukcesu (kod statusu 200), mapa zawiera otrzymane dane, a w przeciwnym razie rzucany jest wyjątek. Wynik każdego żądania jest przekazywany do prywatnej metody __handleResponse_, która obsługuje odpowiedzi HTTP, parsuje dane JSON i dodatkowo jest w stanie odpowiedzieć na ewentualne błędy.
+Po wykonaniu zdjęcia z pomocą pakietu *camera* jest ono przetwarzane i kodowane *Base64*. Po udanej takiej operacji jest ono przesyłane za pomocą metod HTTP do API narzędzia PlantId udostępnionego nam przez firmę kindwise.
+Dodatkowo metody HTTP obsługują odpowiednio usuwanie, dodawanie czy edytowanie informacji o roślinach użytkownika w naszej aplikacji. Wszystkie metody (GET, POST, PUT) zwracają mapę zawierającą dane z odpowiedzi HTTP. W przypadku sukcesu (kod statusu 200), mapa zawiera otrzymane dane, a w przeciwnym razie rzucany jest wyjątek. Wynik każdego żądania jest przekazywany do prywatnej metody _*handleResponse*, która obsługuje odpowiedzi HTTP, parsuje dane JSON i dodatkowo jest w stanie odpowiedzieć na ewentualne błędy.
 
 ### Obsługa Bluetooth
-Aplikacja korzysta z biblioteki do obsługi Bluetooth Classic do przesyłania danych po połączniu serialowym. W trakcie projektowania interfejsu Bluetooth zmieniała się koncepcja rozwiązania wraz z narzędziami. Użycie BT Classic wymusiło wykorzystanie niesprawdzonych i przestarzałych bibliotek Flutterowych. Wstępna wersja aplikacji wraz z interfejsem debugowym, pozwalającym m.in. wysłanie spreparowanych komend do Arduino przy testach end-to-end okazała się nie realizować postawionych zadań - tutaj jako powód wytypowano i potwierdzono przestarzałość biblioteki _flutter_bluetooth_classis_. Wiekowość Bluetooth Classic i niewiele dostępnych (raptem jedna) biblioteka do obsługi tego systemu wymusiło skorzystanie z nieprzetestowanej biblioteki _bluetooth_classic_ w wersji 0.0.1 z raptem 7 like'ami. Okrojony format, brak obsługi błędów i dostępu do sterowania strumieniami do obsługi zdarzeń (zmiana statusu urządzenia, podsłuchiwanie danych otrzymanych na połączenie serialowe) poskutkowało równie okrojonym interfejsem BT.
+
+Aplikacja korzysta z biblioteki do obsługi Bluetooth Classic do przesyłania danych po połączniu serialowym. W trakcie projektowania interfejsu Bluetooth zmieniała się koncepcja rozwiązania wraz z narzędziami. Użycie BT Classic wymusiło wykorzystanie niesprawdzonych i przestarzałych bibliotek Flutterowych. Wstępna wersja aplikacji wraz z interfejsem debugowym, pozwalającym m.in. wysłanie spreparowanych komend do Arduino przy testach end-to-end okazała się nie realizować postawionych zadań - tutaj jako powód wytypowano i potwierdzono przestarzałość biblioteki *flutter_bluetooth_classis*. Wiekowość Bluetooth Classic i niewiele dostępnych (raptem jedna) biblioteka do obsługi tego systemu wymusiło skorzystanie z nieprzetestowanej biblioteki *bluetooth_classic* w wersji 0.0.1 z raptem 7 like'ami. Okrojony format, brak obsługi błędów i dostępu do sterowania strumieniami do obsługi zdarzeń (zmiana statusu urządzenia, podsłuchiwanie danych otrzymanych na połączenie serialowe) poskutkowało równie okrojonym interfejsem BT.
 Obie z podstron 'Debug BT' i 'Home' korzystają z własnych uchwytów do obsługi BT - wszelkie próby zaimplementowania Singletona się nie powiodły.
 
 Wybrana biblioteka niespodziewanie zadziałała (została dostarczona w październiku 2023 i wykorzystywała wspierane API Androida, w przeciwieństwie do wcześniejszej biblioteki) - koniecznie jednak dodanie było zmiennej globalnej śledzącej, czy otwarty został listener na zmiany statusu BT - powtórne dodanie listenera skutkowało zatrzymaniem aplikacji:
 
 * main.dart
+
 ```
 bool IS_LISTENED_TO = false;
 ```
+
 * 'Home' / 'Debug BT'
+
 ```
 if (!IS_LISTENED_TO) {
   BT_DEV.onDeviceStatusChanged().listen((event) {
@@ -274,7 +287,8 @@ Future<void> initPermissionsApi34() async {
   }
 ```
 
-Pierwsze próby połączeniu z Arduino realizowane jest po poprawnym zalogowaniu. Po przejściu do podstrony 'Home' w tle wywoływana jest asynchroniczna metoda _initConnection_ łącząca aplikację z Arduino poprzez standaryzowanym serwis UUID dla połączeń serialowych: **00001101-0000-1000-8000-00805f9b34fb **. Metoda aktualizuje status połączenia, który wykorzystywany jest do obsługi ewentualnych błędów, czy prób podlania kwiatka bez uprzedniego sparowania urządzenia.
+Pierwsze próby połączeniu z Arduino realizowane jest po poprawnym zalogowaniu. Po przejściu do podstrony 'Home' w tle wywoływana jest asynchroniczna metoda *initConnection* łącząca aplikację z Arduino poprzez standaryzowanym serwis UUID dla połączeń serialowych: **00001101-0000-1000-8000-00805f9b34fb**. Metoda aktualizuje status połączenia, który wykorzystywany jest do obsługi ewentualnych błędów, czy prób podlania kwiatka bez uprzedniego sparowania urządzenia.
+
 ```
   Future<void> initConnection() async {
     await BT_DEV.connect(deviceAddress, defaultUuid).then((bool result) {
@@ -285,7 +299,7 @@ Pierwsze próby połączeniu z Arduino realizowane jest po poprawnym zalogowaniu
   }
 ```
 
-W przypadku braku połączenia użytkownik promptowany jest o ponowienie próby połączenia z Arduino poprzez stosowny alert. Po kliknięciu w przycisk wywoływana jest medoda __initConnectionProcess_, łącząca aplikację ze sprzętem.
+W przypadku braku połączenia użytkownik promptowany jest o ponowienie próby połączenia z Arduino poprzez stosowny alert. Po kliknięciu w przycisk wywoływana jest medoda _*initConnectionProcess*, łącząca aplikację ze sprzętem.
 
 ```
 Alert(
@@ -322,6 +336,7 @@ Future<void> _initConnectionProcess() async {
 ```
 
 Kod realizujący podlewanie kwiatków opatrzony jest dodatkowo o stosowne alerty, aktualizowane o wartość wyjątku, który może pojawić się podczas próby pisania do Arduino. Obsłużone są zarówno wyjątki dotyczące podlewania, kiedy sprzęt nie został sparowany, jak i wyjątki samego pisania do zdalnego urządzenia.
+
 ```
 Future<void> _sendWaterProcess() async {
     _waterInProgress = true;
@@ -351,6 +366,88 @@ Future<void> _sendWaterProcess() async {
     _waterInProgress = false;
   }
 ```
+
+### Szkielet aplikacji
+
+Aplikacja składała się z następujących elementów:
+
+* ekran startowy
+
+![plot](./images/rejestracja.png)
+
+* ekran logowania
+
+![plot](./images/logowanie.png)
+
+* ekran rejestracji
+
+![plot](./images/Appka2.png)
+
+* ekran domowy
+
+![plot](./images/Appka5.png)
+
+* ekran dodający kwiatki
+
+![plot](./images/Appka4.png)
+
+* ekran edytujący kwiatki
+
+![plot](./images/Appka4.png)
+
+W aplikacji został obsłużony routing routing pomiędzy konkretnymi ekranami, komunikacja z backendem (opisana powyżej), komunikacja z bluetooth (opisana powyżej), obsługa kamery (opisana wyżej).
+
+Widgety widoczne w aplikacji renderują się w zależności od zwracanych przez backend danych (poniżej przykład wyświetlania kwiatków użytkownika).
+
+```
+          SingleChildScrollView(
+              child: FutureBuilder<List<Plant>?>(
+                  future: plants,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData &&
+                        snapshot.connectionState == ConnectionState.done) {
+                      return ListView.separated(
+                          shrinkWrap: true,
+                          reverse: false,
+                          itemBuilder: (context, index) => PlantContainer(
+                                height: 100,
+                                width: 100,
+                                fontSize: 28,
+                                name: snapshot.data?[index].name,
+                                icon: Icons.sentiment_very_satisfied,
+                                image: snapshot.data![index].getImageWidget(),
+                                plantId: snapshot.data![index].fid,
+                                waterAmount:
+                                    snapshot.data![index].ml_per_watering,
+                              ),
+                          itemCount: snapshot.data!.length,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(height: 0));
+                    } else {
+                      return const Text('');
+                    }
+                  })),
+```
+
+W aplikacji zostały także zaimplementowane cztery różne formularze:
+
+* logowanie
+* rejestracja
+* dodawanie kwiatka
+* edycja kwiatka
+
+W celu ułatwienia i przyśpieszenia prac zostały także utworzone pomocnicze obiekty oraz klasy stali:
+
+* AlertStyle - styl alertów
+* Bar - Pasek na górze aplikacji
+* CameraPage - Panel obsługujący kamerę i przechwytujący zdjęcie
+* CustomButton - Przycisk o określonym stylu
+* CustomLoadingPopUp - PopUp
+* CustomTextFormField - Widget wykorzystywany w formularzach
+* CustomToggleButton - Widget pokazujący dni tygodnia, w którym chcemy podlewać kwiatka
+* PlantContainer - Wyświetla w Home kwiatka użytkownika
+* PlantImage - wyświetla zdjęcie kwiatka w PlantContainer
+* AppTheme - Definiuje style aplikacji, trzcionki, rozmiary, kolory
 
 ## Rozeznanie rynku
 
