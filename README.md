@@ -62,6 +62,8 @@ Endpointy `/api/add_flower` oraz `/api/add_flower_photo`. Ich zadaniem jest zape
 
 Po dodaniu kolejnego zdjęcia do już istniejącego kwiatka następuje jedynie identyfikacja jego zdrowia, którego nowa wartość wpisywana jest do bazy danych.
 
+<div style="page-break-after: always;"></div>
+
 #### Podlewanie
 
 Każdorazowe podlanie kwiatka musi być poprzedzone odnotowaniem tego w bazie danych poprzez wykonanie zapytania na endpoint `/api/add_flower_photo`. Rejestrowane są: identyfikator rośliny, moment podlania oraz ilość dozowanej wody.
@@ -89,6 +91,8 @@ OpenAI API to interfejs programistyczny (API) udostępniany przez firmę OpenAI,
 W projekcie zostało wykorzystane do dopasowania ilości potrzebnej do podlania kwiatka oraz liczbie dni podlewań w tygodniu. Informacje ustalono na podstawie gatunku kwiatka.
 
 Kod z implementacją znajduje się w pliku [chatgpt.py](./backend/src/chatgpt.py)
+
+<div style="page-break-after: always;"></div>
 
 ### Baza danych
 
@@ -119,6 +123,8 @@ W podobny sposób przygotowano kontener obsługujący serwer bazodanowy, w oparc
 Na potrzeby komunikacji sieciowej *baza danych - backend*, z wykorzystaniem platformy *Docker,* została utworzona wirtualna sieć *ikonewa_network*. W tej sieci uruchomione zostały: kontener *backend*, kontener *mysql*.
 
 W celu ekspozycji aplikacji na ruch użytkowników udostępnione zostało dodane przekierowanie portów umożliwiające połączenie tunelu cloudflare oraz kontenera z portem 60001.
+
+<div style="page-break-after: always;"></div>
 
 ### Kubernetes
 
@@ -166,11 +172,11 @@ kubectl apply -f ikonewka_secrets.yaml
     kubectl apply -f ikonewka_mysql_deployment.yaml
     ```
 
+<div style="page-break-after: always;"></div>
+
 ### Cloudflare
 
 Część backend aplikacji *i-konewka* otrzymała osobisty identyfikator w sieci internet za pośrednictwem wykupionej do tego celu domeny [ikonewka.panyre.pl](ikonewka.panyre.pl). Na potrzeby udostępnienia pracującej w środowisku *Docker* aplikacji został utworzony tunel z wykorzystaniem usugi [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), wykorzystujący technikę przekierowania portów TCP na usługę docelową pracującą na porcie 60001. Dzięki tunelowaniu ruchu https, możliwe stało się upublicznienie API aplikacji *i-konewka* w sieci Internet pod podanym wyżej adresem, z użyciem bezpiecznej dla użytkownika końcowego, w pełni szyfrowanej komunikacji TLS.
-
-<div style="page-break-after: always;"></div>
 
 ## Fizyczne urządzenie
 
@@ -225,6 +231,7 @@ Pierwszym etapem dostarczania aplikacji było wykonanie wstępnego szkicu projek
 * Ekran edycji kwiatka (*EditPlant*), pozwalający na zmianę parametrów danej rośliny.
 
 Choć finalna wersja aplikacji odbiega od szkicu, to zachowane zostały kluczowe elementy zamieszczone w prototypie:
+
 ![plot](./images/figma.png)
 
 ### Obsługa kamery
@@ -235,6 +242,8 @@ Rozdzielczość wykonywania zdjęć jest ustalona na charakterystyczną dla uprz
 Obraz z kamery jest jednocześnie wyświetlany na ekranie użytkownika, aby był on w stanie stwierdzić czy na nim widać cały interesujący nas obiekt.
 Po wciśnięciu odpowiedniego przycisku znajdującego się na dole strony, wykonywane jest zdjęcie, które następnie jest zapisywane do pamięci podręcznej urządzenia.
 Na samym końcu metoda dispose zamyka kontroler kamery, aby zwolnić zasoby podczas usuwania widoku.
+
+<div style="page-break-after: always;"></div>
 
 ### Wysyłanie żądań/zapytań do API z poziomu darta
 
@@ -255,6 +264,8 @@ Wybrana biblioteka niespodziewanie zadziałała (została dostarczona w paździe
 ```
 bool IS_LISTENED_TO = false;
 ```
+
+<div style="page-break-after: always;"></div>
 
 * 'Home' / 'Debug BT'
 
@@ -299,6 +310,8 @@ Pierwsze próby połączeniu z Arduino realizowane jest po poprawnym zalogowaniu
   }
 ```
 
+<div style="page-break-after: always;"></div>
+
 W przypadku braku połączenia użytkownik promptowany jest o ponowienie próby połączenia z Arduino poprzez stosowny alert. Po kliknięciu w przycisk wywoływana jest medoda _*initConnectionProcess*, łącząca aplikację ze sprzętem.
 
 ```
@@ -337,6 +350,8 @@ Future<void> _initConnectionProcess() async {
 
 Kod realizujący podlewanie kwiatków opatrzony jest dodatkowo o stosowne alerty, aktualizowane o wartość wyjątku, który może pojawić się podczas próby pisania do Arduino. Obsłużone są zarówno wyjątki dotyczące podlewania, kiedy sprzęt nie został sparowany, jak i wyjątki samego pisania do zdalnego urządzenia.
 
+<div style="page-break-after: always;"></div>
+
 ```
 Future<void> _sendWaterProcess() async {
     _waterInProgress = true;
@@ -366,6 +381,7 @@ Future<void> _sendWaterProcess() async {
     _waterInProgress = false;
   }
 ```
+<div style="page-break-after: always;"></div>
 
 ### Szkielet aplikacji
 
@@ -375,25 +391,37 @@ Aplikacja składała się z następujących elementów:
 
 ![plot](./images/rejestracja.png)
 
+<div style="page-break-after: always;"></div>
+
 * ekran logowania
 
 ![plot](./images/logowanie.png)
+
+<div style="page-break-after: always;"></div>
 
 * ekran rejestracji
 
 ![plot](./images/Appka2.png)
 
+<div style="page-break-after: always;"></div>
+
 * ekran domowy
 
 ![plot](./images/Appka5.png)
+
+<div style="page-break-after: always;"></div>
 
 * ekran dodający kwiatki
 
 ![plot](./images/Appka4.png)
 
+<div style="page-break-after: always;"></div>
+
 * ekran edytujący kwiatki
 
 ![plot](./images/Appka4.png)
+
+<div style="page-break-after: always;"></div>
 
 W aplikacji został obsłużony routing routing pomiędzy konkretnymi ekranami, komunikacja z backendem (opisana powyżej), komunikacja z bluetooth (opisana powyżej), obsługa kamery (opisana wyżej).
 
@@ -429,6 +457,8 @@ Widgety widoczne w aplikacji renderują się w zależności od zwracanych przez 
                   })),
 ```
 
+<div style="page-break-after: always;"></div>
+
 W aplikacji zostały także zaimplementowane cztery różne formularze:
 
 * logowanie
@@ -448,6 +478,8 @@ W celu ułatwienia i przyśpieszenia prac zostały także utworzone pomocnicze o
 * PlantContainer - Wyświetla w Home kwiatka użytkownika
 * PlantImage - wyświetla zdjęcie kwiatka w PlantContainer
 * AppTheme - Definiuje style aplikacji, trzcionki, rozmiary, kolory
+
+<div style="page-break-after: always;"></div>
 
 ## Rozeznanie rynku
 
@@ -485,8 +517,6 @@ się zdarzają.
 * [PlantId](https://plant.id/)
 * [Flutter](https://flutter.dev/)
 * [Flask](https://flask.palletsprojects.com/)
-
-<div style="page-break-after: always;"></div>
 
 ## Możliwy rozwój
 
