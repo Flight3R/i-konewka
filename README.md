@@ -383,7 +383,14 @@ Future<void> _sendWaterProcess() async {
 ```
 <div style="page-break-after: always;"></div>
 
-### Szkielet aplikacji
+
+W ramach implementowania obsługi BT dodano również podstrony w aplikacji do debugowania interfejsu bezprzewodowego (w sumie po jednej z dla każdej z testowanych bibliotek, czyli w sumie 3), z pełnoprawną obsługą wyjątków, alertami ułatwiającymi debug dla testera - ekran ten obejmywał skanowanie w poszukiwaniu danego typu urządzeń, parowanie i wysyłanie ciągów znaków. Dodatkowo, Ekran Logowania i Ekran Domowy zostały odpowiednio zedytowanie, tak aby z ich poziomu ponowić / zestawić / przetestować połaczenie BT.
+Sam szkielet (kod stricte frontendowy) został przerobiony tak, aby uniemożliwić podlewanie w przypadku braku połaczenia / utraty połączenia w trakcie korzystania z aplikacji - aplikacja została wyposażona w stosowne monity.
+
+Z braku możliwości przetestowania aplikacji z urządzeniem końcowym (na finalnym etapie integracji BT -> i-konewka debug i testowanie objęły w sumie 30 paczek ze skompilowanym kodem i wiele godzin obejmującym nie tylko debug interfejsu BT, ale debugu całej aplikacji i losowych nieobsłużonych błędów) podjęto próby wykorzystania frameworku Bumble.
+W sumie podjęto trzy próby zaimplementowania testowego endpointu z wykorzystaniem Bumbla i emulowanego urządzenia Android ze skompilowaną aplikacją. 
+Niestety ze względów sprzętowych (host OS) nie udało się zapewnić połączenia BT między ikonewką a emulatorem za pomocą gniazdek HCI, VHCI. Podobnie z wykorzystaniem Netsima.
+W związku z narzutem pracy związanym z brakiem przykładów użycia Bumbla i niejasnej (w zasadzie braku; poza oficjalną) dokumentacji pomysł symulowania interfejsu BT zarzucono.
 
 Aplikacja składała się z następujących elementów:
 
